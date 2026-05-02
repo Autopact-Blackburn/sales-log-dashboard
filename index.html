@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Sales Log AI | Login</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="login-page">
+  <main class="login-shell">
+    <section class="login-card">
+      <div class="login-badge">AI</div>
+
+      <h1>Sales Log AI</h1>
+      <p>Operational Intelligence Dashboard</p>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="Enter your email" autocomplete="email" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password" />
+      </div>
+
+      <button id="loginBtn" class="primary-btn">Login</button>
+
+      <p id="errorMessage" class="error-message"></p>
+    </section>
+  </main>
+
+  <script type="module" src="auth.js"></script>
+</body>
+</html>
