@@ -3,320 +3,178 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sales Intelligence Dashboard</title>
+  <title>Sales Log AI | Dashboard</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-  <style>
-    :root {
-      --ink: #111827;
-      --muted: #64748b;
-      --line: #dbe4ef;
-      --soft: #f6f8fb;
-      --card: #ffffff;
-      --navy: #0f172a;
-      --blue: #2563eb;
-      --cyan: #06b6d4;
-      --green: #059669;
-      --amber: #d97706;
-      --red: #dc2626;
-      --purple: #7c3aed;
-      --shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
-      --radius: 18px;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 28%),
-        radial-gradient(circle at top right, rgba(6,182,212,.12), transparent 28%),
-        linear-gradient(180deg, #eef4fb 0%, #f7f9fc 45%, #f3f6fa 100%);
-    }
-
-    .topbar {
-      background: rgba(255,255,255,.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--line);
-      padding: 16px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
-    }
-
-    .brand h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; }
-    .brand span { font-size: 12px; color: var(--muted); display: block; margin-top: 2px; }
-    .topbar-right { display: flex; align-items: center; gap: 12px; }
-
-    .search-box {
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 10px 14px;
-      width: 340px;
-      font-size: 13px;
-      outline: none;
-      box-shadow: 0 4px 14px rgba(15,23,42,.04);
-    }
-    .search-box:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37,99,235,.10); }
-
-    .logout-btn, .primary-btn {
-      border: none;
-      background: linear-gradient(135deg, #111827, #1e293b);
-      color: white;
-      padding: 10px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 13px;
-      box-shadow: 0 8px 18px rgba(15,23,42,.16);
-    }
-
-    .page { padding: 22px; }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 18px;
-      margin-bottom: 18px;
-      align-items: stretch;
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(150px, 1fr));
-      gap: 14px;
-    }
-
-    .kpi-card, .upload-panel, .table-shell, .mobile-card, .column-filter-panel {
-      background: rgba(255,255,255,.94);
-      border: 1px solid rgba(219,228,239,.9);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-    }
-
-    .kpi-card { padding: 18px; min-height: 128px; position: relative; overflow: hidden; }
-    .kpi-card::after { content: ''; position: absolute; inset: auto -28px -36px auto; width: 92px; height: 92px; border-radius: 999px; background: rgba(37,99,235,.08); }
-    .kpi-title { font-size: 11px; color: var(--muted); margin-bottom: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
-    .kpi-value { font-size: 30px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
-    .kpi-sub { margin-top: 10px; font-size: 12px; color: var(--muted); }
-
-    .upload-panel { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
-    .upload-panel h3 { font-size: 17px; font-weight: 800; }
-
-    .upload-zone {
-      border: 2px dashed #b8c7d9;
-      border-radius: 18px;
-      padding: 28px 18px;
-      text-align: center;
-      background: linear-gradient(180deg, #f8fbff, #eef6ff);
-      transition: .18s ease;
-      cursor: pointer;
-      min-height: 220px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-    }
-    .upload-zone:hover { background: #eaf3ff; border-color: var(--blue); transform: translateY(-1px); }
-    .upload-zone.dragover { background: #dbeafe; border-color: var(--blue); box-shadow: 0 0 0 5px rgba(37,99,235,.12); transform: scale(1.01); }
-    .upload-icon { font-size: 42px; margin-bottom: 12px; }
-    .upload-zone p { color: var(--muted); font-size: 13px; margin-top: 7px; }
-    .hidden-input { display: none; }
-    .upload-meta { font-size: 12px; color: var(--muted); line-height: 1.7; }
-    .upload-success { color: var(--green); font-weight: 800; margin-top: 10px; line-height: 1.35; }
-    .upload-error { color: var(--red); font-weight: 800; margin-top: 10px; line-height: 1.35; }
-    .upload-processing { color: var(--blue); font-weight: 800; margin-top: 10px; line-height: 1.35; }
-
-    .filters-bar { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 14px; align-items: center; }
-    .filter-btn {
-      border: 1px solid var(--line);
-      background: white;
-      border-radius: 999px;
-      padding: 10px 15px;
-      font-size: 12px;
-      cursor: pointer;
-      font-weight: 800;
-      color: #334155;
-      box-shadow: 0 4px 14px rgba(15,23,42,.04);
-    }
-    .filter-btn.active { background: var(--navy); color: white; border-color: var(--navy); }
-
-    .column-filter-panel { padding: 14px; margin-bottom: 14px; }
-    .column-filter-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 12px; }
-    .column-filter-head h3 { font-size: 15px; font-weight: 800; }
-    .clear-btn { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; font-weight: 800; font-size: 12px; cursor: pointer; }
-    .column-filter-grid { display: grid; grid-template-columns: repeat(6, minmax(150px, 1fr)); gap: 10px; }
-    .filter-field label { display: block; font-size: 10px; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 5px; }
-    .filter-field input, .filter-field select {
-      width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; font-size: 12px; background: #fff; outline: none;
-    }
-    .filter-field input:focus, .filter-field select:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37,99,235,.10); }
-
-    .table-shell { overflow: hidden; }
-    .table-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #fff, #f8fbff); }
-    .table-actions strong { font-size: 14px; }
-    .scroll-hint { font-size: 12px; color: var(--muted); font-weight: 700; }
-    .top-scrollbar { overflow-x: auto; overflow-y: hidden; height: 18px; border-bottom: 1px solid var(--line); background: #f8fafc; }
-    .top-scrollbar-inner { height: 1px; width: 1900px; }
-    .table-wrapper { overflow: auto; max-height: calc(100vh - 350px); min-height: 420px; }
-
-    table { width: 100%; border-collapse: collapse; min-width: 1900px; }
-    thead { background: #f8fafc; position: sticky; top: 0; z-index: 20; }
-    th {
-      padding: 13px 14px;
-      text-align: left;
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--line);
-      white-space: nowrap;
-      cursor: pointer;
-      user-select: none;
-    }
-    th:hover { color: var(--blue); background: #eef6ff; }
-    th .sort-indicator { color: #94a3b8; margin-left: 4px; }
-    td { padding: 12px 14px; border-bottom: 1px solid #edf2f7; font-size: 13px; vertical-align: middle; white-space: nowrap; }
-    tr:hover { background: #fbfdff; }
-    .deal-no { font-weight: 800; color: var(--navy); }
-    .money { font-weight: 800; color: var(--green); }
-    .negative-money { color: var(--red); font-weight: 800; }
-
-    .status-select, .payment-select, .priority-select {
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
-      padding: 8px 10px;
-      background: white;
-      font-size: 12px;
-      font-weight: 700;
-      min-width: 150px;
-      outline: none;
-    }
-    .notes-input { width: 260px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 11px; font-size: 12px; background: #fff; outline: none; }
-    .notes-input:focus { border-color: var(--blue); box-shadow: 0 0 0 4px rgba(37,99,235,.10); }
-
-    .eta-good { color: var(--green); font-weight: 800; }
-    .eta-warning { color: var(--amber); font-weight: 800; }
-    .eta-overdue { color: var(--red); font-weight: 800; }
-    .badge { padding: 7px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
-    .status-new { background: #dbeafe; color: #1d4ed8; }
-    .status-pending-finance { background: #fef3c7; color: #b45309; }
-    .status-being-worked-on { background: #cffafe; color: #0f766e; }
-    .status-at-sublet { background: #ede9fe; color: #6d28d9; }
-    .status-delivered { background: #dcfce7; color: #15803d; }
-    .status-pending { background: #e5e7eb; color: #374151; }
-    .status-cancelled { background: #fee2e2; color: #dc2626; }
-
-    .mobile-cards { display: none; }
-    .mobile-card { padding: 18px; margin-bottom: 14px; }
-    .mobile-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; }
-    .mobile-card h4 { font-size: 17px; font-weight: 800; margin-bottom: 5px; }
-    .mobile-row { margin-bottom: 12px; }
-    .mobile-label { font-size: 10px; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; font-weight: 900; letter-spacing: .05em; }
-
-    @media(max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } .column-filter-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media(max-width: 1100px) { .hero-grid { grid-template-columns: 1fr; } }
-    @media(max-width: 900px) {
-      .topbar { flex-direction: column; gap: 14px; align-items: flex-start; }
-      .topbar-right { width: 100%; flex-wrap: wrap; }
-      .search-box { width: 100%; }
-      .table-shell { display: none; }
-      .mobile-cards { display: block; }
-      .page { padding: 14px; }
-      .kpi-grid, .column-filter-grid { grid-template-columns: repeat(2, 1fr); }
-      .upload-zone { min-height: 170px; }
-    }
-    @media(max-width: 540px) { .kpi-grid, .column-filter-grid { grid-template-columns: 1fr; } }
-  </style>
 </head>
-<body>
-  <div class="topbar">
-    <div class="brand">
-      <h1>Sales Intelligence</h1>
-      <span>Operational Command Centre</span>
-    </div>
-    <div class="topbar-right">
-      <input type="text" id="globalSearch" class="search-box" placeholder="Search customer, deal, vehicle, salesperson...">
-      <button class="logout-btn" id="logoutBtn">Logout</button>
-    </div>
-  </div>
 
-  <div class="page">
-    <div class="hero-grid">
+<body class="dashboard-page">
+  <header class="dashboard-topbar">
+    <div class="dashboard-brand">
+      <div class="dashboard-logo">AI</div>
+      <div>
+        <h1>Sales Log AI</h1>
+        <span>Operational Intelligence Dashboard</span>
+      </div>
+    </div>
+
+    <div class="dashboard-actions">
+      <input
+        id="globalSearch"
+        class="dashboard-search"
+        type="text"
+        placeholder="Search customer, deal, vehicle, salesperson..."
+        autocomplete="off"
+      />
+      <button id="logoutBtn" class="secondary-btn">Logout</button>
+    </div>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
       <div class="kpi-grid">
-        <div class="kpi-card"><div class="kpi-title">Current View Deals</div><div class="kpi-value" id="kpiDeliveries">0</div><div class="kpi-sub">Based on selected filter</div></div>
-        <div class="kpi-card"><div class="kpi-title">Total Gross</div><div class="kpi-value" id="kpiGross">$0</div><div class="kpi-sub">Visible deals</div></div>
-        <div class="kpi-card"><div class="kpi-title">Finance Penetration</div><div class="kpi-value" id="kpiFinance">0%</div><div class="kpi-sub">Dealer finance mix</div></div>
-        <div class="kpi-card"><div class="kpi-title">Pending Finance</div><div class="kpi-value" id="kpiPendingFinance">0</div><div class="kpi-sub">Operational risk</div></div>
-        <div class="kpi-card"><div class="kpi-title">Overdue ETAs</div><div class="kpi-value" id="kpiOverdue">0</div><div class="kpi-sub">ETA before today</div></div>
-        <div class="kpi-card"><div class="kpi-title">Top Brand</div><div class="kpi-value" id="kpiTopBrand">-</div><div class="kpi-sub">Most active pipeline</div></div>
+        <article class="kpi-card">
+          <div class="kpi-label">Current View Deals</div>
+          <div id="kpiDeliveries" class="kpi-value">0</div>
+          <div class="kpi-note">Based on selected filter</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Total Gross</div>
+          <div id="kpiGross" class="kpi-value">$0</div>
+          <div class="kpi-note">Visible deals</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Finance Penetration</div>
+          <div id="kpiFinance" class="kpi-value">0%</div>
+          <div class="kpi-note">Dealer finance mix</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Pending Finance</div>
+          <div id="kpiPendingFinance" class="kpi-value">0</div>
+          <div class="kpi-note">Operational risk</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Overdue ETAs</div>
+          <div id="kpiOverdue" class="kpi-value">0</div>
+          <div class="kpi-note">ETA before today</div>
+        </article>
+
+        <article class="kpi-card">
+          <div class="kpi-label">Top Brand</div>
+          <div id="kpiTopBrand" class="kpi-value">-</div>
+          <div class="kpi-note">Most active pipeline</div>
+        </article>
       </div>
 
-      <div class="upload-panel">
-        <div><h3>Import Latest PDF</h3></div>
-        <div class="upload-zone" id="uploadZone">
-          <div class="upload-icon">📄</div>
-          <strong>Drag & Drop Latest PDF</strong>
-          <p>Drop the full dealership deal log here, or click to upload</p>
-          <div id="uploadStatus"></div>
+      <aside class="upload-card">
+        <div class="upload-header">
+          <h2>Import Latest PDF</h2>
+          <span>Drag/drop engine isolated</span>
         </div>
-        <input type="file" id="pdfInput" class="hidden-input" accept="application/pdf">
+
+        <div id="uploadZone" class="upload-zone" role="button" tabindex="0">
+          <div class="upload-icon">📄</div>
+          <strong>Drop Deal Log PDF Here</strong>
+          <p>Drag the dealership PDF directly onto this panel</p>
+          <small>Click is still available as a fallback only.</small>
+          <div id="uploadStatus" class="upload-status"></div>
+        </div>
+
+        <input id="pdfInput" class="hidden-input" type="file" accept="application/pdf" />
+
         <div class="upload-meta">
           <div><strong>Last Import:</strong> <span id="lastImport">Never</span></div>
           <div><strong>New Deals:</strong> <span id="newDeals">0</span></div>
           <div><strong>Updated Deals:</strong> <span id="updatedDeals">0</span></div>
         </div>
-      </div>
-    </div>
+      </aside>
+    </section>
 
-    <div class="filters-bar">
+    <section class="view-filters" aria-label="Dashboard views">
       <button class="filter-btn active" data-view="current">Current Month</button>
       <button class="filter-btn" data-view="future">Future Pipeline</button>
       <button class="filter-btn" data-view="pendingFinance">Pending Finance</button>
       <button class="filter-btn" data-view="delivered">Delivered</button>
       <button class="filter-btn" data-view="cancelled">Cancelled</button>
       <button class="filter-btn" data-view="all">All Deals</button>
-    </div>
+    </section>
 
-    <div class="column-filter-panel">
-      <div class="column-filter-head">
-        <h3>Column Filters</h3>
-        <button class="clear-btn" id="clearColumnFilters">Clear Filters</button>
+    <section class="column-filter-card">
+      <div class="column-filter-header">
+        <h2>Column Filters</h2>
+        <button id="clearColumnFilters" class="mini-btn">Clear Filters</button>
       </div>
+
       <div class="column-filter-grid">
-        <div class="filter-field"><label>Deal No</label><input data-column-filter="deal_no" placeholder="BK6810"></div>
-        <div class="filter-field"><label>Dept</label><select data-column-filter="dept_code"><option value="">All</option></select></div>
-        <div class="filter-field"><label>Customer</label><input data-column-filter="customer_name" placeholder="Customer name"></div>
-        <div class="filter-field"><label>Salesperson</label><input data-column-filter="salesperson" placeholder="Salesperson"></div>
-        <div class="filter-field"><label>Vehicle</label><input data-column-filter="vehicle_description" placeholder="Model / vehicle"></div>
-        <div class="filter-field"><label>ETA Month</label><input data-column-filter="eta_date" placeholder="05/2026 or 2026-05"></div>
-        <div class="filter-field"><label>Status</label><select data-column-filter="status"><option value="">All</option></select></div>
-        <div class="filter-field"><label>Payment</label><select data-column-filter="payment_method"><option value="">All</option></select></div>
-        <div class="filter-field"><label>Priority</label><select data-column-filter="priority"><option value="">All</option></select></div>
-      </div>
-    </div>
+        <label>
+          <span>Deal No</span>
+          <input data-column-filter="deal_no" placeholder="BK6810" />
+        </label>
 
-    <div class="table-shell">
-      <div class="table-actions">
-        <strong id="tableCount">0 deals showing</strong>
-        <span class="scroll-hint">Scroll left/right using the top or bottom scrollbar</span>
+        <label>
+          <span>Dept</span>
+          <select data-column-filter="dept_code"><option value="">All</option></select>
+        </label>
+
+        <label>
+          <span>Customer</span>
+          <input data-column-filter="customer_name" placeholder="Customer name" />
+        </label>
+
+        <label>
+          <span>Salesperson</span>
+          <input data-column-filter="salesperson" placeholder="Salesperson" />
+        </label>
+
+        <label>
+          <span>Vehicle</span>
+          <input data-column-filter="vehicle_description" placeholder="Model / vehicle" />
+        </label>
+
+        <label>
+          <span>ETA</span>
+          <input data-column-filter="eta_date" placeholder="05/2026 or 2026-05" />
+        </label>
+
+        <label>
+          <span>Status</span>
+          <select data-column-filter="status"><option value="">All</option></select>
+        </label>
+
+        <label>
+          <span>Payment</span>
+          <select data-column-filter="payment_method"><option value="">All</option></select>
+        </label>
+
+        <label>
+          <span>Priority</span>
+          <select data-column-filter="priority"><option value="">All</option></select>
+        </label>
       </div>
-      <div class="top-scrollbar" id="topScrollbar"><div class="top-scrollbar-inner" id="topScrollbarInner"></div></div>
-      <div class="table-wrapper" id="tableWrapper">
+    </section>
+
+    <section class="table-card">
+      <div class="table-toolbar">
+        <strong id="tableCount">0 deals showing</strong>
+        <span>Use top or bottom scrollbar to move left/right</span>
+      </div>
+
+      <div id="topScrollbar" class="top-scrollbar">
+        <div id="topScrollbarInner" class="top-scrollbar-inner"></div>
+      </div>
+
+      <div id="tableWrapper" class="table-wrapper">
         <table id="dealsTable">
           <thead>
             <tr>
@@ -338,541 +196,11 @@
           <tbody id="dealsTableBody"></tbody>
         </table>
       </div>
-    </div>
+    </section>
 
-    <div class="mobile-cards" id="mobileCards"></div>
-  </div>
+    <section id="mobileCards" class="mobile-cards"></section>
+  </main>
 
-  <script>
-    const SUPABASE_URL = 'https://fpuuzgjxmpglklufuovx.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJIUzI1NiIsInJlZiI6ImZwdXV6Z2p4bXBnbGtsdWZ1b3Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTY3NjksImV4cCI6MjA5MzIzMjc2OX0.qLI0QjsJbKuGNTJAv5Pg6xRc9245xrBkawjvbd7RnBw'.replace('eyJpc3MiOiJIUzI1Ni', 'eyJpc3MiOiJzdXBhYmFzZS');
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let allDeals = [];
-    let visibleDeals = [];
-    let activeView = 'current';
-    let sortState = { column: 'eta_date', direction: 'asc' };
-    let columnFilters = {};
-
-    const STATUS_OPTIONS = ['New', 'Pending Finance', 'Being Worked On', 'At Sublet', 'Delivered', 'Pending', 'Cancelled'];
-    const PAYMENT_OPTIONS = ['Unknown / Pending', 'Cash', 'EFT', 'Dealer Finance', 'Novated Lease', 'External Finance', 'Fleet / Salary Packaging'];
-    const PRIORITY_OPTIONS = ['Low', 'Normal', 'High'];
-    const SOURCE_FIELDS = ['deal_no','deal_date','dms_status','dept_code','dept_name','dealership','department','brand','customer_name','salesperson','stock_no','vehicle_description','eta_date','gross','deposit','sale_type','customer_no','last_imported_at'];
-
-    const DEPT_MAP = {
-      BLK: { name: 'B/Burn Kia', brand: 'Kia', site: 'Blackburn' },
-      BKF: { name: 'B/Burn Kia Flt', brand: 'Kia Fleet', site: 'Blackburn' },
-      BLG: { name: 'B/Burn GWM/Hava', brand: 'GWM/Haval', site: 'Blackburn' },
-      BLN: { name: 'B/Burn Nissan', brand: 'Nissan', site: 'Blackburn' },
-      BLU: { name: 'B/Burn Used', brand: 'Used', site: 'Blackburn' },
-      BWH: { name: 'Burwood HA/GR', brand: 'GWM/Haval', site: 'Burwood' },
-      BWN: { name: 'Burwood Nissan', brand: 'Nissan', site: 'Burwood' },
-      BWU: { name: 'Burwood Used', brand: 'Used', site: 'Burwood' },
-      BX: { name: 'Burwood Xpeng', brand: 'Xpeng', site: 'Burwood' }
-    };
-
-    const SALESPEOPLE = [
-      'Liam WIlliamson','Mark Thomas','Jarrah Martin','Stephen Frick','Ross Walsh','Tim Pevitt','Peter Reid','Louie Liu','Jason Eng','David Wang','Teagan McLaughlin','Francis Chua','Kassie Zhang','Cody Meyer','Victoria Blaszczyk','Michael Liu','Chelsy Corcoran','Nik Gatsios','Jonathan Chen','Theo Mavridis','Mark Wee','Brad Lister','Scott Van Hauen','Yekta Karimifar','Jeremy James'
-    ];
-
-    async function initDashboard() {
-      await validateSession();
-      setupGlobalDragProtection();
-      setupDragAndDropEngine();
-      setupFilterButtons();
-      setupSearch();
-      setupColumnFilters();
-      setupTableSort();
-      setupSyncedScrollbars();
-      await loadDeals();
-      setupRealtime();
-    }
-
-    async function validateSession() {
-      const { data } = await supabaseClient.auth.getSession();
-      if (!data.session) window.location.href = 'index.html';
-    }
-
-    async function loadDeals() {
-      const { data, error } = await supabaseClient.from('deals').select('*').order('eta_date', { ascending: true, nullsFirst: false });
-      if (error) { console.error('Load deals failed:', error); alert('Could not load deals. Check Supabase RLS/user permissions.'); return; }
-      allDeals = data || [];
-      populateFilterOptions();
-      applyCurrentView();
-    }
-
-    function setupFilterButtons() {
-      document.querySelectorAll('.filter-btn').forEach(button => {
-        button.addEventListener('click', () => {
-          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-          button.classList.add('active');
-          activeView = button.dataset.view;
-          applyCurrentView();
-        });
-      });
-    }
-
-    function setActiveFilter(view) {
-      activeView = view;
-      document.querySelectorAll('.filter-btn').forEach(button => button.classList.toggle('active', button.dataset.view === view));
-      applyCurrentView();
-    }
-
-    function applyCurrentView() {
-      const now = new Date();
-      const currentMonth = now.getMonth();
-      const currentYear = now.getFullYear();
-      const endOfCurrentMonth = new Date(currentYear, currentMonth + 1, 0);
-
-      let source = allDeals.filter(deal => {
-        const eta = deal.eta_date ? new Date(deal.eta_date + 'T00:00:00') : null;
-        if (activeView === 'all') return true;
-        if (activeView === 'delivered') return deal.status === 'Delivered';
-        if (activeView === 'cancelled') return deal.status === 'Cancelled';
-        if (activeView === 'pendingFinance') return deal.status === 'Pending Finance' || deal.payment_method === 'Dealer Finance';
-        if (activeView === 'future') return eta && eta > endOfCurrentMonth && deal.status !== 'Delivered' && deal.status !== 'Cancelled';
-        if (activeView === 'current') return eta && eta.getMonth() === currentMonth && eta.getFullYear() === currentYear && deal.status !== 'Delivered' && deal.status !== 'Cancelled';
-        return true;
-      });
-
-      source = applyGlobalSearch(source);
-      source = applyColumnFilters(source);
-      source = sortDeals(source);
-      visibleDeals = source;
-      renderAll();
-    }
-
-    function renderAll() {
-      renderKPIs();
-      renderTable(visibleDeals);
-      renderMobileCards(visibleDeals);
-      document.getElementById('tableCount').textContent = `${visibleDeals.length} deal${visibleDeals.length === 1 ? '' : 's'} showing`;
-      requestAnimationFrame(syncTopScrollbarWidth);
-    }
-
-    function renderKPIs() {
-      const source = visibleDeals;
-      const totalGross = source.reduce((sum, d) => sum + (Number(d.gross) || 0), 0);
-      const financeDeals = source.filter(d => d.payment_method === 'Dealer Finance').length;
-      const financePen = source.length ? Math.round((financeDeals / source.length) * 100) : 0;
-      const pendingFinance = source.filter(d => d.status === 'Pending Finance').length;
-      const overdue = source.filter(d => d.eta_date && startOfDay(new Date(d.eta_date + 'T00:00:00')) < startOfDay(new Date()) && d.status !== 'Delivered' && d.status !== 'Cancelled').length;
-      const brandMap = {};
-      source.forEach(d => { brandMap[d.brand || 'Unknown'] = (brandMap[d.brand || 'Unknown'] || 0) + 1; });
-      const topBrand = Object.keys(brandMap).sort((a,b) => brandMap[b] - brandMap[a])[0] || '-';
-      document.getElementById('kpiDeliveries').textContent = source.length;
-      document.getElementById('kpiGross').textContent = formatMoney(totalGross);
-      document.getElementById('kpiFinance').textContent = `${financePen}%`;
-      document.getElementById('kpiPendingFinance').textContent = pendingFinance;
-      document.getElementById('kpiOverdue').textContent = overdue;
-      document.getElementById('kpiTopBrand').textContent = topBrand;
-    }
-
-    function renderTable(sourceDeals) {
-      const tbody = document.getElementById('dealsTableBody');
-      tbody.innerHTML = '';
-      updateSortIndicators();
-      sourceDeals.forEach(deal => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="deal-no">${escapeHtml(deal.deal_no || '')}</td>
-          <td>${escapeHtml(deal.dept_code || '')}</td>
-          <td>${escapeHtml(deal.customer_name || '')}</td>
-          <td>${escapeHtml(deal.salesperson || '')}</td>
-          <td title="${escapeAttr(deal.vehicle_description || '')}">${escapeHtml(shorten(deal.vehicle_description || '', 64))}</td>
-          <td class="${getEtaClass(deal.eta_date, deal.status)}">${formatDate(deal.eta_date)}</td>
-          <td class="${Number(deal.gross) < 0 ? 'negative-money' : 'money'}">${formatMoney(deal.gross)}</td>
-          <td>${formatMoney(deal.deposit)}</td>
-          <td><select class="status-select ${getStatusBadgeClass(deal.status)}" onchange="updateField('${deal.id}', 'status', this.value)">${STATUS_OPTIONS.map(s => `<option value="${s}" ${deal.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
-          <td><select class="payment-select" onchange="updateField('${deal.id}', 'payment_method', this.value)">${PAYMENT_OPTIONS.map(p => `<option value="${p}" ${deal.payment_method === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
-          <td><select class="priority-select" onchange="updateField('${deal.id}', 'priority', this.value)">${PRIORITY_OPTIONS.map(p => `<option value="${p}" ${deal.priority === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
-          <td><input class="notes-input" value="${escapeAttr(deal.notes || '')}" placeholder="Add notes..." onblur="updateField('${deal.id}', 'notes', this.value)"></td>
-          <td>${timeAgo(deal.updated_at)}</td>`;
-        tbody.appendChild(row);
-      });
-    }
-
-    function renderMobileCards(sourceDeals) {
-      const container = document.getElementById('mobileCards');
-      container.innerHTML = '';
-      sourceDeals.forEach(deal => {
-        const card = document.createElement('div');
-        card.className = 'mobile-card';
-        card.innerHTML = `
-          <div class="mobile-card-top"><div><h4>${escapeHtml(deal.customer_name || '')}</h4><div>${escapeHtml(deal.deal_no || '')} · ${escapeHtml(deal.dept_code || '')}</div></div><div class="badge ${getStatusBadgeClass(deal.status)}">${escapeHtml(deal.status || 'New')}</div></div>
-          <div class="mobile-row"><div class="mobile-label">Vehicle</div><div>${escapeHtml(deal.vehicle_description || '')}</div></div>
-          <div class="mobile-row"><div class="mobile-label">Salesperson</div><div>${escapeHtml(deal.salesperson || '')}</div></div>
-          <div class="mobile-row"><div class="mobile-label">ETA</div><div class="${getEtaClass(deal.eta_date, deal.status)}">${formatDate(deal.eta_date)}</div></div>
-          <div class="mobile-row"><div class="mobile-label">Gross</div><div class="${Number(deal.gross) < 0 ? 'negative-money' : 'money'}">${formatMoney(deal.gross)}</div></div>
-          <div class="mobile-row"><div class="mobile-label">Status</div><select class="status-select" onchange="updateField('${deal.id}', 'status', this.value)">${STATUS_OPTIONS.map(s => `<option value="${s}" ${deal.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-          <div class="mobile-row"><div class="mobile-label">Payment</div><select class="payment-select" onchange="updateField('${deal.id}', 'payment_method', this.value)">${PAYMENT_OPTIONS.map(p => `<option value="${p}" ${deal.payment_method === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
-          <div class="mobile-row"><div class="mobile-label">Notes</div><input class="notes-input" value="${escapeAttr(deal.notes || '')}" placeholder="Add notes..." onblur="updateField('${deal.id}', 'notes', this.value)"></div>`;
-        container.appendChild(card);
-      });
-    }
-
-    async function updateField(id, field, value) {
-      const { error } = await supabaseClient.from('deals').update({ [field]: value, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) { console.error('Update failed:', error); alert('Update failed. Check permissions.'); }
-    }
-
-    function setupRealtime() {
-      supabaseClient.channel('deals-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => loadDeals()).subscribe();
-    }
-
-    function setupSearch() {
-      document.getElementById('globalSearch').addEventListener('input', () => applyCurrentView());
-    }
-
-    function applyGlobalSearch(source) {
-      const term = document.getElementById('globalSearch').value.toLowerCase().trim();
-      if (!term) return source;
-      return source.filter(d => ['customer_name','deal_no','salesperson','vehicle_description','dept_code','dept_name','brand'].some(field => String(d[field] || '').toLowerCase().includes(term)));
-    }
-
-    function setupColumnFilters() {
-      document.querySelectorAll('[data-column-filter]').forEach(input => {
-        input.addEventListener('input', () => { columnFilters[input.dataset.columnFilter] = input.value.trim(); applyCurrentView(); });
-        input.addEventListener('change', () => { columnFilters[input.dataset.columnFilter] = input.value.trim(); applyCurrentView(); });
-      });
-      document.getElementById('clearColumnFilters').addEventListener('click', () => {
-        columnFilters = {};
-        document.querySelectorAll('[data-column-filter]').forEach(input => input.value = '');
-        applyCurrentView();
-      });
-    }
-
-    function populateFilterOptions() {
-      fillSelect('dept_code', Object.keys(DEPT_MAP));
-      fillSelect('status', STATUS_OPTIONS);
-      fillSelect('payment_method', PAYMENT_OPTIONS);
-      fillSelect('priority', PRIORITY_OPTIONS);
-    }
-
-    function fillSelect(field, options) {
-      const select = document.querySelector(`[data-column-filter="${field}"]`);
-      if (!select || select.dataset.filled === 'true') return;
-      options.forEach(value => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.textContent = value;
-        select.appendChild(option);
-      });
-      select.dataset.filled = 'true';
-    }
-
-    function applyColumnFilters(source) {
-      return source.filter(deal => {
-        return Object.entries(columnFilters).every(([field, raw]) => {
-          const value = String(raw || '').toLowerCase().trim();
-          if (!value) return true;
-          if (field === 'eta_date') {
-            const iso = String(deal.eta_date || '').toLowerCase();
-            const au = deal.eta_date ? formatDate(deal.eta_date).toLowerCase() : '';
-            return iso.includes(value) || au.includes(value);
-          }
-          return String(deal[field] || '').toLowerCase().includes(value);
-        });
-      });
-    }
-
-    function setupTableSort() {
-      document.querySelectorAll('th[data-sort]').forEach(th => {
-        th.addEventListener('click', () => {
-          const column = th.dataset.sort;
-          if (sortState.column === column) sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
-          else sortState = { column, direction: 'asc' };
-          applyCurrentView();
-        });
-      });
-    }
-
-    function sortDeals(source) {
-      const { column, direction } = sortState;
-      const multiplier = direction === 'asc' ? 1 : -1;
-      return [...source].sort((a,b) => {
-        let av = a[column], bv = b[column];
-        if (['gross','deposit'].includes(column)) { av = Number(av || 0); bv = Number(bv || 0); return (av - bv) * multiplier; }
-        if (['eta_date','updated_at'].includes(column)) { av = av ? new Date(av).getTime() : 0; bv = bv ? new Date(bv).getTime() : 0; return (av - bv) * multiplier; }
-        return String(av || '').localeCompare(String(bv || '')) * multiplier;
-      });
-    }
-
-    function updateSortIndicators() {
-      document.querySelectorAll('th[data-sort] .sort-indicator').forEach(span => span.textContent = '');
-      const active = document.querySelector(`th[data-sort="${sortState.column}"] .sort-indicator`);
-      if (active) active.textContent = sortState.direction === 'asc' ? '▲' : '▼';
-    }
-
-    function setupSyncedScrollbars() {
-      const top = document.getElementById('topScrollbar');
-      const wrapper = document.getElementById('tableWrapper');
-      let syncing = false;
-      top.addEventListener('scroll', () => { if (syncing) return; syncing = true; wrapper.scrollLeft = top.scrollLeft; syncing = false; });
-      wrapper.addEventListener('scroll', () => { if (syncing) return; syncing = true; top.scrollLeft = wrapper.scrollLeft; syncing = false; });
-      window.addEventListener('resize', syncTopScrollbarWidth);
-    }
-
-    function syncTopScrollbarWidth() {
-      const table = document.getElementById('dealsTable');
-      const inner = document.getElementById('topScrollbarInner');
-      if (table && inner) inner.style.width = `${table.scrollWidth}px`;
-    }
-
-    document.getElementById('logoutBtn').addEventListener('click', async () => { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; });
-
-    function setupGlobalDragProtection() {
-      ['dragenter','dragover','dragleave','drop'].forEach(eventName => {
-        window.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-        document.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-        document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, { capture: true });
-      });
-    }
-
-    function setupDragAndDropEngine() {
-      const uploadZone = document.getElementById('uploadZone');
-      const pdfInput = document.getElementById('pdfInput');
-      uploadZone.addEventListener('click', () => pdfInput.click());
-      ['dragenter','dragover'].forEach(eventName => uploadZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); uploadZone.classList.add('dragover'); }, false));
-      ['dragleave','drop'].forEach(eventName => uploadZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); uploadZone.classList.remove('dragover'); }, false));
-      uploadZone.addEventListener('drop', async e => {
-        e.preventDefault(); e.stopPropagation(); uploadZone.classList.remove('dragover');
-        const file = Array.from(e.dataTransfer?.files || []).find(f => f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf'));
-        if (file) await handlePDFFile(file);
-      }, false);
-      pdfInput.addEventListener('change', async e => { const file = e.target.files?.[0]; if (file) await handlePDFFile(file); e.target.value = ''; });
-    }
-
-    async function handlePDFFile(file) {
-      const uploadStatus = document.getElementById('uploadStatus');
-      if (!file || !file.name.toLowerCase().endsWith('.pdf')) { uploadStatus.innerHTML = '<div class="upload-error">Only PDF files are supported.</div>'; return; }
-      try {
-        uploadStatus.innerHTML = '<div class="upload-processing">Reading PDF...</div>';
-        const extraction = await extractPDFRows(file);
-        console.log('PDF pages:', extraction.pages);
-        console.log('PDF rows:', extraction.rows);
-        uploadStatus.innerHTML = '<div class="upload-processing">Mapping deals and ETA dates...</div>';
-        const parsedDeals = parseDealRows(extraction.rows);
-        console.log('Parsed deals:', parsedDeals);
-        if (!parsedDeals.length) { uploadStatus.innerHTML = `<div class="upload-error">No valid deal rows found. Rows read: ${extraction.rows.length}</div>`; return; }
-        const withEta = parsedDeals.filter(d => d.eta_date).length;
-        uploadStatus.innerHTML = `<div class="upload-processing">Uploading ${parsedDeals.length} deals · ${withEta} ETA dates found...</div>`;
-        const existingDealNos = new Set(allDeals.map(d => d.deal_no));
-        const newCount = parsedDeals.filter(d => !existingDealNos.has(d.deal_no)).length;
-        const updatedCount = parsedDeals.length - newCount;
-        await upsertParsedDeals(parsedDeals);
-        document.getElementById('lastImport').textContent = new Date().toLocaleString('en-AU');
-        document.getElementById('newDeals').textContent = newCount;
-        document.getElementById('updatedDeals').textContent = updatedCount;
-        uploadStatus.innerHTML = `<div class="upload-success">Import complete: ${parsedDeals.length} deals · ${withEta} ETA dates · ${newCount} new / ${updatedCount} updated</div>`;
-        await loadDeals();
-        setActiveFilter('current');
-      } catch (error) {
-        console.error('PDF import failed:', error);
-        uploadStatus.innerHTML = `<div class="upload-error">Import failed: ${escapeHtml(error.message || 'Unknown error')}</div>`;
-      }
-    }
-
-    async function extractPDFRows(file) {
-      if (!window.pdfjsLib) throw new Error('PDF.js did not load.');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const allRows = [];
-      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-        const page = await pdf.getPage(pageNumber);
-        const content = await page.getTextContent({ normalizeWhitespace: true, disableCombineTextItems: false });
-        const items = content.items.map(item => ({ str: String(item.str || '').trim(), x: Number(item.transform[4]), y: Number(item.transform[5]) })).filter(item => item.str);
-        allRows.push(...groupItemsIntoVisualRows(items));
-      }
-      return { pages: pdf.numPages, rows: allRows };
-    }
-
-    function groupItemsIntoVisualRows(items) {
-      const tolerance = 5.5;
-      const groups = [];
-      items.sort((a,b) => b.y - a.y || a.x - b.x).forEach(item => {
-        let group = groups.find(g => Math.abs(g.y - item.y) <= tolerance);
-        if (!group) { group = { y: item.y, items: [] }; groups.push(group); }
-        group.items.push(item);
-      });
-      return groups.sort((a,b) => b.y - a.y).map(group => {
-        return group.items.sort((a,b) => a.x - b.x).map(item => item.str).join(' ').replace(/\s+/g, ' ').trim();
-      }).filter(Boolean);
-    }
-
-    function parseDealRows(rows) {
-      const records = [];
-      let current = null;
-      for (const rawRow of rows) {
-        const line = cleanLine(rawRow);
-        if (!line || isHeaderLine(line)) continue;
-        if (isDealStartLine(line)) {
-          if (current) records.push(current);
-          current = { mainLine: line, continuationLines: [] };
-        } else if (current) {
-          current.continuationLines.push(line);
-        }
-      }
-      if (current) records.push(current);
-      const parsed = records.map(parseDealRecord).filter(Boolean);
-      const deduped = new Map();
-      parsed.forEach(deal => deduped.set(deal.deal_no, deal));
-      return Array.from(deduped.values());
-    }
-
-    function cleanLine(value) { return String(value || '').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, ' ').trim(); }
-
-    function isHeaderLine(line) {
-      return line.includes('AG-DAILY-LOG') || line.includes('Deal Dat') || line.includes('--------') || line.includes('Page #') || line.includes('records listed') || line.startsWith('[(') || line.startsWith('For:') || line.startsWith('Port:');
-    }
-
-    function isDealStartLine(line) {
-      return /^\d{2}\/\d{2}\/\d{2}\s+([A-Z]{1,4}|KF)\d{3,6}\s+[A-Z]\s+(BLK|BKF|BLG|BLN|BLU|BWH|BWN|BWU|BX)\b/.test(line);
-    }
-
-    function parseDealRecord(record) {
-      const line = cleanLine(record.mainLine);
-      const header = line.match(/^(\d{2}\/\d{2}\/\d{2})\s+([A-Z]{1,4}\d{3,6})\s+([A-Z])\s+(BLK|BKF|BLG|BLN|BLU|BWH|BWN|BWU|BX)\s+(.+)$/);
-      if (!header) return null;
-      const dealDate = toISODate(header[1]);
-      const dealNo = header[2];
-      const dmsStatus = header[3];
-      const deptCode = header[4];
-      const deptInfo = DEPT_MAP[deptCode] || { name: '', brand: 'Unknown', site: '' };
-      let body = header[5].trim();
-      if (deptInfo.name && body.startsWith(deptInfo.name)) body = body.slice(deptInfo.name.length).trim();
-
-      const etaMatch = body.match(/\b([RFGS])(?:\s+(\d{2}\/\d{2}\/\d{2}))?\s*$/);
-      const saleType = etaMatch ? etaMatch[1] : '';
-      const etaDate = etaMatch && etaMatch[2] ? toISODate(etaMatch[2]) : null;
-      if (etaMatch) body = body.slice(0, etaMatch.index).trim();
-
-      const moneyMatches = [...body.matchAll(/-?\d{1,6}\.\d{2}/g)];
-      let gross = null, deposit = null;
-      if (moneyMatches.length) {
-        gross = Number(moneyMatches[0][0]);
-        if (moneyMatches[1] && Number(moneyMatches[1][0]) <= 60000) deposit = Number(moneyMatches[1][0]);
-      }
-      const beforeMoney = moneyMatches.length ? body.slice(0, moneyMatches[0].index).trim() : body;
-      const afterMoney = moneyMatches.length ? body.slice(moneyMatches[0].index).trim() : '';
-      const customerNoMatch = afterMoney.match(/\b\d{5,8}\b/);
-      const customerNo = customerNoMatch ? customerNoMatch[0] : '';
-
-      const front = parseCustomerSalespersonVehicle(beforeMoney, record.continuationLines);
-      return {
-        deal_no: dealNo,
-        deal_date: dealDate,
-        dms_status: dmsStatus,
-        dept_code: deptCode,
-        dept_name: deptInfo.name || '',
-        dealership: deptInfo.site || '',
-        department: deptInfo.name || '',
-        brand: deptInfo.brand || 'Unknown',
-        customer_name: front.customerName || 'Unknown Customer',
-        salesperson: front.salesperson || '',
-        stock_no: front.stockNo || '',
-        vehicle_description: front.vehicleDescription || '',
-        eta_date: etaDate,
-        gross,
-        deposit,
-        sale_type: saleType,
-        customer_no: customerNo,
-        last_imported_at: new Date().toISOString()
-      };
-    }
-
-    function parseCustomerSalespersonVehicle(text, continuationLines) {
-      let working = cleanLine(text);
-      let salesperson = '';
-      let salespersonIndex = -1;
-      for (const name of SALESPEOPLE) {
-        const parts = name.split(' ');
-        const first = parts[0];
-        const last = parts[1] || '';
-        const loose = new RegExp(`\\b${escapeRegExp(first)}\\s+${escapeRegExp(last.slice(0, Math.min(5, last.length)))}`, 'i');
-        const match = working.match(loose);
-        if (match && (salespersonIndex === -1 || match.index < salespersonIndex)) {
-          salespersonIndex = match.index;
-          salesperson = name;
-        }
-      }
-      if (salespersonIndex === -1) {
-        const stockFallback = working.search(/\b([A-Z]{0,3}\d{3,7}|UC\d{4,7}|NI\d{4,7}|G\d{3,7}|K\d{3,7}|N\d{3,7}|XP\d{3,7})\b/);
-        const leftFallback = stockFallback > -1 ? working.slice(0, stockFallback).trim() : working;
-        const words = leftFallback.split(' ').filter(Boolean);
-        if (words.length >= 3) {
-          salesperson = words.slice(-2).join(' ');
-          salespersonIndex = leftFallback.lastIndexOf(salesperson);
-        }
-      }
-
-      let customerName = working;
-      let vehiclePart = '';
-      if (salespersonIndex > -1) {
-        customerName = working.slice(0, salespersonIndex).trim();
-        vehiclePart = working.slice(salespersonIndex).trim();
-        const looseSales = salesperson.split(' ')[0];
-        vehiclePart = vehiclePart.replace(new RegExp('^' + escapeRegExp(looseSales) + '\\s+\\S+', 'i'), '').trim();
-      }
-
-      const stockMatch = vehiclePart.match(/\b([A-Z]{0,3}\d{3,7}|UC\d{4,7}|NI\d{4,7}|G\d{3,7}|K\d{3,7}|N\d{3,7}|XP\d{3,7}|[A-Z0-9]{1,8}\*O)\b/);
-      let stockNo = '';
-      if (stockMatch) { stockNo = stockMatch[1]; vehiclePart = vehiclePart.replace(stockMatch[0], '').trim(); }
-
-      const continuationVehicle = [];
-      continuationLines.slice(0, 2).forEach(line => {
-        const cleaned = cleanLine(line);
-        if (!cleaned || isHeaderLine(cleaned) || isDealStartLine(cleaned)) return;
-        if (/^(amson|s|tin|ick|aughlin|hen|dis|ng|u|coran|laszczyk|to SUV|d Auto SUV|l)$/i.test(cleaned)) return;
-        if (!/\d{2}\/\d{2}\/\d{2}/.test(cleaned)) continuationVehicle.push(cleaned);
-      });
-
-      return {
-        customerName: customerName.replace(/\s+/g, ' ').trim(),
-        salesperson: salesperson.replace(/\s+/g, ' ').trim(),
-        stockNo,
-        vehicleDescription: [vehiclePart, ...continuationVehicle].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim()
-      };
-    }
-
-    async function upsertParsedDeals(parsedDeals) {
-      const cleaned = parsedDeals.map(deal => {
-        const row = {};
-        SOURCE_FIELDS.forEach(field => { if (deal[field] !== undefined) row[field] = deal[field]; });
-        row.status = undefined;
-        row.notes = undefined;
-        row.payment_method = undefined;
-        row.priority = undefined;
-        row.finance_approved = undefined;
-        row.delivery_confirmed = undefined;
-        Object.keys(row).forEach(key => row[key] === undefined && delete row[key]);
-        return row;
-      });
-      const chunkSize = 100;
-      for (let i = 0; i < cleaned.length; i += chunkSize) {
-        const chunk = cleaned.slice(i, i + chunkSize);
-        const { error } = await supabaseClient.from('deals').upsert(chunk, { onConflict: 'deal_no' });
-        if (error) throw new Error(error.message);
-      }
-    }
-
-    function formatMoney(value) {
-      if (value === null || value === undefined || value === '') return '$0';
-      return Number(value || 0).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
-    }
-    function formatDate(date) { return date ? new Date(date + 'T00:00:00').toLocaleDateString('en-AU') : '-'; }
-    function toISODate(dateString) { const [day, month, year] = dateString.split('/'); const fullYear = Number(year) >= 70 ? `19${year}` : `20${year}`; return `${fullYear}-${month}-${day}`; }
-    function timeAgo(date) { if (!date) return '-'; const seconds = Math.floor((new Date() - new Date(date)) / 1000); const intervals = { year:31536000, month:2592000, day:86400, hour:3600, minute:60 }; for (let key in intervals) { const interval = Math.floor(seconds / intervals[key]); if (interval >= 1) return `${interval} ${key}${interval > 1 ? 's' : ''} ago`; } return 'Just now'; }
-    function getEtaClass(date, status) { if (!date || status === 'Delivered' || status === 'Cancelled') return ''; const eta = startOfDay(new Date(date + 'T00:00:00')); const today = startOfDay(new Date()); const days = (eta - today) / 86400000; if (days < 0) return 'eta-overdue'; if (days < 7) return 'eta-warning'; return 'eta-good'; }
-    function getStatusBadgeClass(status) { switch(status) { case 'New': return 'status-new'; case 'Pending Finance': return 'status-pending-finance'; case 'Being Worked On': return 'status-being-worked-on'; case 'At Sublet': return 'status-at-sublet'; case 'Delivered': return 'status-delivered'; case 'Pending': return 'status-pending'; case 'Cancelled': return 'status-cancelled'; default: return ''; } }
-    function startOfDay(date) { return new Date(date.getFullYear(), date.getMonth(), date.getDate()); }
-    function shorten(text, max) { return text && text.length > max ? text.slice(0, max) + '...' : (text || ''); }
-    function escapeHtml(value) { return String(value).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;'); }
-    function escapeAttr(value) { return escapeHtml(value).replaceAll('\n', ' '); }
-    function escapeRegExp(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-    initDashboard();
-  </script>
+  <script type="module" src="dashboard-app.js"></script>
 </body>
 </html>
