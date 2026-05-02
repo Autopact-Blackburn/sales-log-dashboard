@@ -2,30 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sales Log AI | Dashboard</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <title>
+    Sales Log AI | Dashboard
+  </title>
 
-  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
+  />
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 
 <body class="dashboard-page">
+
   <header class="dashboard-topbar">
+
     <div class="dashboard-brand">
-      <div class="dashboard-logo">AI</div>
+
+      <div class="dashboard-logo">
+        AI
+      </div>
+
       <div>
-        <h1>Sales Log AI</h1>
-        <span>Operational Intelligence Dashboard</span>
+        <h1>
+          Sales Log AI
+        </h1>
+
+        <span>
+          Operational Intelligence Dashboard
+        </span>
       </div>
     </div>
 
     <div class="dashboard-actions">
+
       <input
         id="globalSearch"
         class="dashboard-search"
@@ -33,174 +67,540 @@
         placeholder="Search customer, deal, vehicle, salesperson..."
         autocomplete="off"
       />
-      <button id="logoutBtn" class="secondary-btn">Logout</button>
+
+      <button
+        id="logoutBtn"
+        class="secondary-btn"
+      >
+        Logout
+      </button>
+
     </div>
+
   </header>
 
   <main class="dashboard-shell">
+
     <section class="dashboard-hero">
+
       <div class="kpi-grid">
+
         <article class="kpi-card">
-          <div class="kpi-label">Current View Deals</div>
-          <div id="kpiDeliveries" class="kpi-value">0</div>
-          <div class="kpi-note">Based on selected filter</div>
+
+          <div class="kpi-label">
+            Delivery Risk
+          </div>
+
+          <div
+            id="kpiDeliveries"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+          <div
+            id="kpiDeliveriesSub"
+            class="kpi-note"
+          >
+            Deals at operational risk
+          </div>
+
         </article>
 
         <article class="kpi-card">
-          <div class="kpi-label">Total Gross</div>
-          <div id="kpiGross" class="kpi-value">$0</div>
-          <div class="kpi-note">Visible deals</div>
+
+          <div class="kpi-label">
+            Total Gross
+          </div>
+
+          <div
+            id="kpiGross"
+            class="kpi-value"
+          >
+            $0
+          </div>
+
+          <div
+            id="kpiGrossSub"
+            class="kpi-note"
+          >
+            Visible deal gross
+          </div>
+
         </article>
 
         <article class="kpi-card">
-          <div class="kpi-label">Finance Penetration</div>
-          <div id="kpiFinance" class="kpi-value">0%</div>
-          <div class="kpi-note">Dealer finance mix</div>
+
+          <div class="kpi-label">
+            Pending Finance
+          </div>
+
+          <div
+            id="kpiFinance"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+          <div
+            id="kpiFinanceSub"
+            class="kpi-note"
+          >
+            Awaiting finance outcome
+          </div>
+
         </article>
 
         <article class="kpi-card">
-          <div class="kpi-label">Pending Finance</div>
-          <div id="kpiPendingFinance" class="kpi-value">0</div>
-          <div class="kpi-note">Operational risk</div>
+
+          <div class="kpi-label">
+            Stale Deals
+          </div>
+
+          <div
+            id="kpiPendingFinance"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+          <div
+            id="kpiPendingFinanceSub"
+            class="kpi-note"
+          >
+            Untouched &gt;5 days
+          </div>
+
         </article>
 
         <article class="kpi-card">
-          <div class="kpi-label">Overdue ETAs</div>
-          <div id="kpiOverdue" class="kpi-value">0</div>
-          <div class="kpi-note">ETA before today</div>
+
+          <div class="kpi-label">
+            Deliveries Next 7 Days
+          </div>
+
+          <div
+            id="kpiOverdue"
+            class="kpi-value"
+          >
+            0
+          </div>
+
+          <div
+            id="kpiOverdueSub"
+            class="kpi-note"
+          >
+            Operational planning window
+          </div>
+
         </article>
 
         <article class="kpi-card">
-          <div class="kpi-label">Top Brand</div>
-          <div id="kpiTopBrand" class="kpi-value">-</div>
-          <div class="kpi-note">Most active pipeline</div>
+
+          <div class="kpi-label">
+            Top Salesperson
+          </div>
+
+          <div
+            id="kpiTopBrand"
+            class="kpi-value"
+          >
+            -
+          </div>
+
+          <div
+            id="kpiTopBrandSub"
+            class="kpi-note"
+          >
+            Most active pipeline
+          </div>
+
         </article>
+
+        <article class="kpi-card">
+
+          <div class="kpi-label">
+            Negative Exposure
+          </div>
+
+          <div
+            id="kpiExposure"
+            class="kpi-value"
+          >
+            $0
+          </div>
+
+          <div
+            id="kpiExposureSub"
+            class="kpi-note"
+          >
+            Negative gross exposure
+          </div>
+
+        </article>
+
       </div>
 
       <aside class="upload-card">
+
         <div class="upload-header">
-          <h2>Import Latest PDF</h2>
-          <span>Drag/drop engine isolated</span>
+
+          <h2>
+            Import Latest PDF
+          </h2>
+
+          <span>
+            Drag/drop engine isolated
+          </span>
+
         </div>
 
-        <div id="uploadZone" class="upload-zone" role="button" tabindex="0">
-          <div class="upload-icon">📄</div>
-          <strong>Drop Deal Log PDF Here</strong>
-          <p>Drag the dealership PDF directly onto this panel</p>
-          <small>Click is still available as a fallback only.</small>
-          <div id="uploadStatus" class="upload-status"></div>
+        <div
+          id="uploadZone"
+          class="upload-zone"
+          role="button"
+          tabindex="0"
+        >
+
+          <div class="upload-icon">
+            📄
+          </div>
+
+          <strong>
+            Drop Deal Log PDF Here
+          </strong>
+
+          <p>
+            Drag the dealership PDF directly onto this panel
+          </p>
+
+          <small>
+            Click is still available as a fallback only.
+          </small>
+
+          <div
+            id="uploadStatus"
+            class="upload-status"
+          ></div>
+
         </div>
 
-        <input id="pdfInput" class="hidden-input" type="file" accept="application/pdf" />
+        <input
+          id="pdfInput"
+          class="hidden-input"
+          type="file"
+          accept="application/pdf"
+        />
 
         <div class="upload-meta">
-          <div><strong>Last Import:</strong> <span id="lastImport">Never</span></div>
-          <div><strong>New Deals:</strong> <span id="newDeals">0</span></div>
-          <div><strong>Updated Deals:</strong> <span id="updatedDeals">0</span></div>
+
+          <div>
+            <strong>Last Import:</strong>
+            <span id="lastImport">
+              Never
+            </span>
+          </div>
+
+          <div>
+            <strong>New Deals:</strong>
+            <span id="newDeals">
+              0
+            </span>
+          </div>
+
+          <div>
+            <strong>Updated Deals:</strong>
+            <span id="updatedDeals">
+              0
+            </span>
+          </div>
+
         </div>
+
       </aside>
+
     </section>
 
-    <section class="view-filters" aria-label="Dashboard views">
-      <button class="filter-btn active" data-view="current">Current Month</button>
-      <button class="filter-btn" data-view="future">Future Pipeline</button>
-      <button class="filter-btn" data-view="pendingFinance">Pending Finance</button>
-      <button class="filter-btn" data-view="delivered">Delivered</button>
-      <button class="filter-btn" data-view="cancelled">Cancelled</button>
-      <button class="filter-btn" data-view="all">All Deals</button>
+    <section
+      class="view-filters"
+      aria-label="Dashboard views"
+    >
+
+      <button
+        class="filter-btn active"
+        data-view="current"
+      >
+        Current Month
+      </button>
+
+      <button
+        class="filter-btn"
+        data-view="future"
+      >
+        Future Pipeline
+      </button>
+
+      <button
+        class="filter-btn"
+        data-view="pendingFinance"
+      >
+        Pending Finance
+      </button>
+
+      <button
+        class="filter-btn"
+        data-view="delivered"
+      >
+        Delivered
+      </button>
+
+      <button
+        class="filter-btn"
+        data-view="cancelled"
+      >
+        Cancelled
+      </button>
+
+      <button
+        class="filter-btn"
+        data-view="all"
+      >
+        All Deals
+      </button>
+
     </section>
 
     <section class="column-filter-card">
+
       <div class="column-filter-header">
-        <h2>Column Filters</h2>
-        <button id="clearColumnFilters" class="mini-btn">Clear Filters</button>
+
+        <h2>
+          Column Filters
+        </h2>
+
+        <button
+          id="clearColumnFilters"
+          class="mini-btn"
+        >
+          Clear Filters
+        </button>
+
       </div>
 
       <div class="column-filter-grid">
+
         <label>
           <span>Deal No</span>
-          <input data-column-filter="deal_no" placeholder="BK6810" />
+
+          <input
+            data-column-filter="deal_no"
+            placeholder="BK6810"
+          />
         </label>
 
         <label>
           <span>Dept</span>
-          <select data-column-filter="dept_code"><option value="">All</option></select>
+
+          <select data-column-filter="dept_code">
+            <option value="">
+              All
+            </option>
+          </select>
         </label>
 
         <label>
           <span>Customer</span>
-          <input data-column-filter="customer_name" placeholder="Customer name" />
+
+          <input
+            data-column-filter="customer_name"
+            placeholder="Customer name"
+          />
         </label>
 
         <label>
           <span>Salesperson</span>
-          <input data-column-filter="salesperson" placeholder="Salesperson" />
+
+          <input
+            data-column-filter="salesperson"
+            placeholder="Salesperson"
+          />
         </label>
 
         <label>
           <span>Vehicle</span>
-          <input data-column-filter="vehicle_description" placeholder="Model / vehicle" />
+
+          <input
+            data-column-filter="vehicle_description"
+            placeholder="Model / vehicle"
+          />
         </label>
 
         <label>
           <span>ETA</span>
-          <input data-column-filter="eta_date" placeholder="05/2026 or 2026-05" />
+
+          <input
+            data-column-filter="eta_date"
+            placeholder="05/2026 or 2026-05"
+          />
         </label>
 
         <label>
           <span>Status</span>
-          <select data-column-filter="status"><option value="">All</option></select>
+
+          <select data-column-filter="status">
+            <option value="">
+              All
+            </option>
+          </select>
         </label>
 
         <label>
           <span>Payment</span>
-          <select data-column-filter="payment_method"><option value="">All</option></select>
+
+          <select data-column-filter="payment_method">
+            <option value="">
+              All
+            </option>
+          </select>
         </label>
 
         <label>
           <span>Priority</span>
-          <select data-column-filter="priority"><option value="">All</option></select>
+
+          <select data-column-filter="priority">
+            <option value="">
+              All
+            </option>
+          </select>
         </label>
+
       </div>
+
     </section>
 
     <section class="table-card">
+
       <div class="table-toolbar">
-        <strong id="tableCount">0 deals showing</strong>
-        <span>Use top or bottom scrollbar to move left/right</span>
+
+        <strong id="tableCount">
+          0 deals showing
+        </strong>
+
+        <span>
+          Use top or bottom scrollbar to move left/right
+        </span>
+
       </div>
 
-      <div id="topScrollbar" class="top-scrollbar">
-        <div id="topScrollbarInner" class="top-scrollbar-inner"></div>
+      <div
+        id="topScrollbar"
+        class="top-scrollbar"
+      >
+        <div
+          id="topScrollbarInner"
+          class="top-scrollbar-inner"
+        ></div>
       </div>
 
-      <div id="tableWrapper" class="table-wrapper">
+      <div
+        id="tableWrapper"
+        class="table-wrapper"
+      >
+
         <table id="dealsTable">
+
           <thead>
+
             <tr>
-              <th data-sort="deal_no">Deal No <span class="sort-indicator"></span></th>
-              <th data-sort="dept_code">Dept <span class="sort-indicator"></span></th>
-              <th data-sort="customer_name">Customer <span class="sort-indicator"></span></th>
-              <th data-sort="salesperson">Salesperson <span class="sort-indicator"></span></th>
-              <th data-sort="vehicle_description">Vehicle <span class="sort-indicator"></span></th>
-              <th data-sort="eta_date">ETA <span class="sort-indicator"></span></th>
-              <th data-sort="gross">Gross <span class="sort-indicator"></span></th>
-              <th data-sort="deposit">Deposit <span class="sort-indicator"></span></th>
-              <th data-sort="status">Status <span class="sort-indicator"></span></th>
-              <th data-sort="payment_method">Payment Method <span class="sort-indicator"></span></th>
-              <th data-sort="priority">Priority <span class="sort-indicator"></span></th>
-              <th data-sort="notes">Notes <span class="sort-indicator"></span></th>
-              <th data-sort="updated_at">Updated <span class="sort-indicator"></span></th>
+
+              <th data-sort="deal_no">
+                Deal No
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="dept_code">
+                Dept
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="customer_name">
+                Customer
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="salesperson">
+                Salesperson
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="vehicle_description">
+                Vehicle
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="eta_date">
+                ETA
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="gross">
+                Gross
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="deposit">
+                Deposit
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="status">
+                Status
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="payment_method">
+                Payment Method
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="priority">
+                Priority
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="notes">
+                Notes
+                <span class="sort-indicator"></span>
+              </th>
+
+              <th data-sort="updated_at">
+                Updated
+                <span class="sort-indicator"></span>
+              </th>
+
             </tr>
+
           </thead>
+
           <tbody id="dealsTableBody"></tbody>
+
         </table>
+
       </div>
+
     </section>
 
-    <section id="mobileCards" class="mobile-cards"></section>
+    <section
+      id="mobileCards"
+      class="mobile-cards"
+    ></section>
+
   </main>
 
-  <script type="module" src="dashboard-app.js"></script>
+  <script
+    type="module"
+    src="dashboard-app.js"
+  ></script>
+
 </body>
 </html>

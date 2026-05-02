@@ -1,104 +1,306 @@
 import { updateDealField } from './datastore.js';
 
-const STATUS_OPTIONS = [
-  'New',
-  'Pending Finance',
-  'Being Worked On',
-  'At Sublet',
-  'Delivered',
-  'Pending',
-  'Cancelled'
-];
-
-const PAYMENT_OPTIONS = [
-  'Unknown / Pending',
-  'Cash',
-  'EFT',
-  'Dealer Finance',
-  'Novated Lease',
-  'External Finance',
-  'Fleet / Salary Packaging'
-];
-
-const PRIORITY_OPTIONS = [
-  'Low',
-  'Normal',
-  'High'
-];
-
 export function renderDashboard(deals) {
+
   renderKPIs(deals);
+
   renderTable(deals);
-  renderMobileCards(deals);
+
   updateCounts(deals);
-  syncTopScrollbarWidth();
 }
 
 function renderKPIs(deals) {
-  const totalGross = deals.reduce((sum, d) => sum + (Number(d.gross) || 0), 0);
 
-  const financeDeals = deals.filter(d => d.payment_method === 'Dealer Finance').length;
-  const financePenetration = deals.length ? Math.round((financeDeals / deals.length) * 100) : 0;
+  const totalGross =
+    deals.reduce(
+      (sum, d) => sum + (Number(d.gross) || 0),
+      0
+    );
 
-  const pendingFinance = deals.filter(d => d.status === 'Pending Finance').length;
+  const negativeGrossDeals =
+    deals.filter(d =>
+      Number(d.gross) < 0
+    );
 
-  const overdue = deals.filter(d => {
-    if (!d.eta_date) return false;
+  const negativeExposure =
+    negativeGrossDeals.reduce(
+      (sum, d) => sum + Number(d.gross || 0),
+      0
+    );
 
-    const eta = new Date(d.eta_date + 'T00:00:00');
-    const today = startOfDay(new Date());
+  const overdueETAs =
+    deals.filter(d => {
 
-    return eta < today &&
-      d.status !== 'Delivered' &&
-      d.status !== 'Cancelled';
-  }).length;
+      if (!d.eta) return false;
 
-  setText('kpiDeliveries', deals.length);
-  setText('kpiGross', formatMoney(totalGross));
-  setText('kpiFinance', `${financePenetration}%`);
-  setText('kpiPendingFinance', pendingFinance);
-  setText('kpiOverdue', overdue);
-  setText('kpiTopBrand', detectTopBrand(deals));
+      const eta =
+        parseAUDate(d.eta);
+
+      if (!eta) return false;
+
+      return (
+        eta < startOfDay(new Date()) &&
+        d.status !== 'Delivered' &&
+        d.status !== 'Cancelled'
+      );
+    });
+
+  const next7Days =
+    deals.filter(d => {
+
+      if (!d.eta) return false;
+
+      const eta =
+        parseAUDate(d.eta);
+
+      if (!eta) return false;
+
+      const diff =
+        (eta - startOfDay(new Date()))
+        / 86400000;
+
+      return diff >= 0 && diff <= 7;
+    });
+
+  const pendingFinance =
+    deals.filter(d =>
+      String(d.payment || '')
+        .toLowerCase()
+        .includes('finance')
+    );
+
+  const staleDeals =
+    deals.filter(d => {
+
+      if (!d.updated) return true;
+
+      const updated =
+        new Date(d.updated);
+
+      const diff =
+        (Date.now() - updated.getTime())
+        / 86400000;
+
+      return diff > 5;
+    });
+
+  const topSalesperson =
+    detectTopSalesperson(deals);
+
+  setText(
+    'kpiDeliveries',
+    overdueETAs.length
+  );
+
+  setText(
+    'kpiDeliveriesSub',
+    'Deals at operational risk'
+  );
+
+  setText(
+    'kpiGross',
+    formatMoney(totalGross)
+  );
+
+  setText(
+    'kpiGrossSub',
+    `${negativeGrossDeals.length} negative deals`
+  );
+
+  setText(
+    'kpiFinance',
+    pendingFinance.length
+  );
+
+  setText(
+    'kpiFinanceSub',
+    'Awaiting finance outcome'
+  );
+
+  setText(
+    'kpiPendingFinance',
+    staleDeals.length
+  );
+
+  setText(
+    'kpiPendingFinanceSub',
+    'Untouched >5 days'
+  );
+
+  setText(
+    'kpiOverdue',
+    next7Days.length
+  );
+
+  setText(
+    'kpiOverdueSub',
+    'Deliveries next 7 days'
+  );
+
+  setText(
+    'kpiTopBrand',
+    topSalesperson.name
+  );
+
+  setText(
+    'kpiTopBrandSub',
+    `${topSalesperson.count} active deals`
+  );
+
+  const exposureTile =
+    document.getElementById(
+      'kpiExposure'
+    );
+
+  const exposureSub =
+    document.getElementById(
+      'kpiExposureSub'
+    );
+
+  if (exposureTile) {
+
+    exposureTile.textContent =
+      formatMoney(negativeExposure);
+  }
+
+  if (exposureSub) {
+
+    exposureSub.textContent =
+      'Negative gross exposure';
+  }
 }
 
 function renderTable(deals) {
-  const tbody = document.getElementById('dealsTableBody');
+
+  const tbody =
+    document.getElementById(
+      'dealsTableBody'
+    );
 
   if (!tbody) return;
 
   tbody.innerHTML = '';
 
   deals.forEach(deal => {
-    const row = document.createElement('tr');
+
+    const row =
+      document.createElement('tr');
 
     row.innerHTML = `
-      <td class="deal-no">${escapeHtml(deal.deal_no || '')}</td>
-      <td>${escapeHtml(deal.dept_code || '')}</td>
-      <td>${escapeHtml(deal.customer_name || '')}</td>
-      <td>${escapeHtml(deal.salesperson || '')}</td>
-      <td title="${escapeAttr(deal.vehicle_description || '')}">${escapeHtml(shorten(deal.vehicle_description || '', 90))}</td>
-      <td class="${getEtaClass(deal)}">${formatDate(deal.eta_date)}</td>
-      <td class="${Number(deal.gross) < 0 ? 'negative-money' : 'money'}">${formatMoney(deal.gross)}</td>
-      <td>${formatMoney(deal.deposit)}</td>
+
+      <td class="deal-no">
+        ${escapeHtml(deal.dealNo || '')}
+      </td>
+
       <td>
-        <select class="status-select" data-id="${deal.id || ''}" data-field="status">
-          ${renderOptions(STATUS_OPTIONS, deal.status || 'New')}
+        ${escapeHtml(deal.department || '')}
+      </td>
+
+      <td>
+        ${escapeHtml(deal.customer || '')}
+      </td>
+
+      <td>
+        ${escapeHtml(deal.salesperson || '')}
+      </td>
+
+      <td title="${escapeAttr(deal.vehicle || '')}">
+        ${escapeHtml(shorten(deal.vehicle || '', 90))}
+      </td>
+
+      <td class="${getEtaClass(deal)}">
+        ${escapeHtml(deal.eta || '-')}
+      </td>
+
+      <td class="${Number(deal.gross) < 0 ? 'negative-money' : 'money'}">
+        ${formatMoney(deal.gross)}
+      </td>
+
+      <td>
+        ${formatMoney(deal.deposit)}
+      </td>
+
+      <td>
+        <select
+          class="status-select"
+          data-id="${deal.id || ''}"
+          data-field="status"
+        >
+          ${renderStatusOptions(deal.status)}
         </select>
       </td>
+
       <td>
-        <select class="payment-select" data-id="${deal.id || ''}" data-field="payment_method">
-          ${renderOptions(PAYMENT_OPTIONS, deal.payment_method || 'Unknown / Pending')}
+        <select
+          class="status-select"
+          data-id="${deal.id || ''}"
+          data-field="payment_method"
+        >
+          <option ${
+            deal.payment === 'Cash'
+              ? 'selected' : ''
+          }>
+            Cash
+          </option>
+
+          <option ${
+            deal.payment === 'Dealer Finance'
+              ? 'selected' : ''
+          }>
+            Dealer Finance
+          </option>
+
+          <option ${
+            deal.payment === 'Unknown / Pending'
+              ? 'selected' : ''
+          }>
+            Unknown / Pending
+          </option>
         </select>
       </td>
+
       <td>
-        <select class="priority-select" data-id="${deal.id || ''}" data-field="priority">
-          ${renderOptions(PRIORITY_OPTIONS, deal.priority || 'Normal')}
+        <select
+          class="status-select"
+          data-id="${deal.id || ''}"
+          data-field="priority"
+        >
+          <option ${
+            deal.priority === 'Normal'
+              ? 'selected' : ''
+          }>
+            Normal
+          </option>
+
+          <option ${
+            deal.priority === 'Hot'
+              ? 'selected' : ''
+          }>
+            Hot
+          </option>
+
+          <option ${
+            deal.priority === 'Critical'
+              ? 'selected' : ''
+          }>
+            Critical
+          </option>
         </select>
       </td>
+
       <td>
-        <input class="notes-input" data-id="${deal.id || ''}" data-field="notes" value="${escapeAttr(deal.notes || '')}" placeholder="Add notes..." />
+        <input
+          class="notes-input"
+          data-id="${deal.id || ''}"
+          data-field="notes"
+          value="${escapeAttr(deal.notes || '')}"
+          placeholder="Add notes..."
+        />
       </td>
-      <td>${timeAgo(deal.updated_at)}</td>
+
+      <td>
+        ${formatUpdated(deal.updated)}
+      </td>
     `;
 
     tbody.appendChild(row);
@@ -107,162 +309,203 @@ function renderTable(deals) {
   bindEditableFields();
 }
 
-function renderMobileCards(deals) {
-  const container = document.getElementById('mobileCards');
+function detectTopSalesperson(deals) {
 
-  if (!container) return;
-
-  container.innerHTML = '';
+  const counts = {};
 
   deals.forEach(deal => {
-    const card = document.createElement('div');
 
-    card.className = 'mobile-card';
+    const person =
+      deal.salesperson || 'Unknown';
 
-    card.innerHTML = `
-      <div class="mobile-card-top">
-        <div>
-          <h4>${escapeHtml(deal.customer_name || '')}</h4>
-          <div>${escapeHtml(deal.deal_no || '')} · ${escapeHtml(deal.dept_code || '')}</div>
-        </div>
-        <div class="badge">${escapeHtml(deal.status || 'New')}</div>
-      </div>
-      <div class="mobile-row"><div class="mobile-label">Vehicle</div><div>${escapeHtml(deal.vehicle_description || '')}</div></div>
-      <div class="mobile-row"><div class="mobile-label">Salesperson</div><div>${escapeHtml(deal.salesperson || '')}</div></div>
-      <div class="mobile-row"><div class="mobile-label">ETA</div><div class="${getEtaClass(deal)}">${formatDate(deal.eta_date)}</div></div>
-      <div class="mobile-row"><div class="mobile-label">Gross</div><div class="${Number(deal.gross) < 0 ? 'negative-money' : 'money'}">${formatMoney(deal.gross)}</div></div>
-    `;
-
-    container.appendChild(card);
-  });
-}
-
-function bindEditableFields() {
-  document.querySelectorAll('[data-field]').forEach(el => {
-    if (el.dataset.bound === 'true') return;
-
-    el.dataset.bound = 'true';
-
-    const eventName = el.tagName === 'SELECT' ? 'change' : 'blur';
-
-    el.addEventListener(eventName, async e => {
-      const id = e.target.dataset.id;
-      const field = e.target.dataset.field;
-      const value = e.target.value;
-
-      if (!id || !field) return;
-
-      try {
-        await updateDealField(id, field, value);
-      } catch (err) {
-        console.error(err);
-        alert(err.message || 'Update failed');
-      }
-    });
-  });
-}
-
-function renderOptions(options, currentValue) {
-  return options.map(option => `
-    <option value="${escapeAttr(option)}" ${option === currentValue ? 'selected' : ''}>
-      ${escapeHtml(option)}
-    </option>
-  `).join('');
-}
-
-function detectTopBrand(deals) {
-  const brands = {};
-
-  deals.forEach(deal => {
-    const source = `${deal.brand || ''} ${deal.vehicle_description || ''}`.toLowerCase();
-
-    let brand = 'Other';
-
-    if (source.includes('kia')) brand = 'Kia';
-    else if (source.includes('nissan') || source.includes('qashqai') || source.includes('patrol')) brand = 'Nissan';
-    else if (source.includes('gwm') || source.includes('haval') || source.includes('cannon') || source.includes('tank')) brand = 'GWM/Haval';
-    else if (source.includes('xpeng') || source.includes('rwd')) brand = 'Xpeng';
-
-    brands[brand] = (brands[brand] || 0) + 1;
+    counts[person] =
+      (counts[person] || 0) + 1;
   });
 
-  return Object.keys(brands).sort((a, b) => brands[b] - brands[a])[0] || '-';
+  const top =
+    Object.entries(counts)
+      .sort((a,b) => b[1] - a[1])[0];
+
+  if (!top) {
+    return {
+      name: '-',
+      count: 0
+    };
+  }
+
+  return {
+    name: top[0],
+    count: top[1]
+  };
 }
 
 function updateCounts(deals) {
-  setText('tableCount', `${deals.length} deal${deals.length === 1 ? '' : 's'} showing`);
-}
 
-function syncTopScrollbarWidth() {
-  const table = document.getElementById('dealsTable');
-  const inner = document.getElementById('topScrollbarInner');
+  const count =
+    document.getElementById(
+      'tableCount'
+    );
 
-  if (table && inner) {
-    inner.style.width = `${table.scrollWidth}px`;
-  }
+  if (!count) return;
+
+  count.textContent =
+    `${deals.length} deals showing`;
 }
 
 function getEtaClass(deal) {
-  if (!deal.eta_date || deal.status === 'Delivered' || deal.status === 'Cancelled') {
+
+  if (!deal.eta) {
     return '';
   }
 
-  const eta = startOfDay(new Date(deal.eta_date + 'T00:00:00'));
-  const today = startOfDay(new Date());
-  const diff = (eta - today) / 86400000;
+  const eta =
+    parseAUDate(deal.eta);
 
-  if (diff < 0) return 'eta-overdue';
-  if (diff < 7) return 'eta-warning';
+  if (!eta) {
+    return '';
+  }
+
+  const diff =
+    (eta - startOfDay(new Date()))
+    / 86400000;
+
+  if (diff < 0) {
+    return 'eta-overdue';
+  }
+
+  if (diff <= 7) {
+    return 'eta-warning';
+  }
 
   return 'eta-good';
 }
 
-function formatMoney(value) {
-  return Number(value || 0).toLocaleString('en-AU', {
-    style: 'currency',
-    currency: 'AUD',
-    maximumFractionDigits: 0
-  });
+function renderStatusOptions(current) {
+
+  const statuses = [
+    'New',
+    'Pending Finance',
+    'Being Worked On',
+    'Delivered',
+    'Cancelled'
+  ];
+
+  return statuses
+    .map(status => `
+      <option
+        value="${status}"
+        ${current === status ? 'selected' : ''}
+      >
+        ${status}
+      </option>
+    `)
+    .join('');
 }
 
-function formatDate(value) {
-  if (!value) return '-';
+function bindEditableFields() {
 
-  return new Date(value + 'T00:00:00').toLocaleDateString('en-AU');
+  document
+    .querySelectorAll('[data-field]')
+    .forEach(el => {
+
+      if (el.dataset.bound === 'true') {
+        return;
+      }
+
+      el.dataset.bound = 'true';
+
+      el.addEventListener(
+        'change',
+        async e => {
+
+          await updateDealField(
+            e.target.dataset.id,
+            e.target.dataset.field,
+            e.target.value
+          );
+        }
+      );
+    });
 }
 
-function timeAgo(value) {
-  if (!value) return '-';
+function parseAUDate(value) {
 
-  const seconds = Math.floor((new Date() - new Date(value)) / 1000);
-  const intervals = { year: 31536000, month: 2592000, day: 86400, hour: 3600, minute: 60 };
+  if (!value) return null;
 
-  for (const key in intervals) {
-    const interval = Math.floor(seconds / intervals[key]);
+  const parts =
+    value.split('/');
 
-    if (interval >= 1) {
-      return `${interval} ${key}${interval > 1 ? 's' : ''} ago`;
-    }
+  if (parts.length !== 3) {
+    return null;
   }
 
-  return 'Just now';
-}
+  const day =
+    Number(parts[0]);
 
-function shorten(text, max) {
-  if (!text) return '';
-  return text.length > max ? text.slice(0, max) + '...' : text;
-}
+  const month =
+    Number(parts[1]) - 1;
 
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value;
+  const year =
+    2000 + Number(parts[2]);
+
+  return new Date(
+    year,
+    month,
+    day
+  );
 }
 
 function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
+}
+
+function formatMoney(value) {
+
+  return Number(value || 0)
+    .toLocaleString(
+      'en-AU',
+      {
+        style: 'currency',
+        currency: 'AUD',
+        maximumFractionDigits: 0
+      }
+    );
+}
+
+function formatUpdated(value) {
+
+  if (!value) return '-';
+
+  return new Date(value)
+    .toLocaleString('en-AU');
+}
+
+function shorten(text, max) {
+
+  if (!text) return '';
+
+  return text.length > max
+    ? text.slice(0, max) + '...'
+    : text;
+}
+
+function setText(id, value) {
+
+  const el =
+    document.getElementById(id);
+
+  if (el) {
+    el.textContent = value;
+  }
 }
 
 function escapeHtml(value) {
+
   return String(value)
     .replaceAll('&', '&amp;')
     .replaceAll('<', '&lt;')
@@ -272,5 +515,7 @@ function escapeHtml(value) {
 }
 
 function escapeAttr(value) {
-  return escapeHtml(value).replaceAll('\n', ' ');
+
+  return escapeHtml(value)
+    .replaceAll('\n', ' ');
 }
