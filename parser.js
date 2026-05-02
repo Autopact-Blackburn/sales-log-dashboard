@@ -10,6 +10,18 @@ const DEPT_CODES = [
   'BX'
 ];
 
+const DEPT_INFO = {
+  BLK: { name: 'B/Burn Kia', brand: 'Kia', site: 'Blackburn' },
+  BKF: { name: 'B/Burn Kia Flt', brand: 'Kia Fleet', site: 'Blackburn' },
+  BLG: { name: 'B/Burn GWM/Hava', brand: 'GWM/Haval', site: 'Blackburn' },
+  BLN: { name: 'B/Burn Nissan', brand: 'Nissan', site: 'Blackburn' },
+  BLU: { name: 'B/Burn Used', brand: 'Used', site: 'Blackburn' },
+  BWH: { name: 'Burwood HA/GR', brand: 'GWM/Haval', site: 'Burwood' },
+  BWN: { name: 'Burwood Nissan', brand: 'Nissan', site: 'Burwood' },
+  BWU: { name: 'Burwood Used', brand: 'Used', site: 'Burwood' },
+  BX: { name: 'Burwood Xpeng', brand: 'Xpeng', site: 'Burwood' }
+};
+
 const SALESPEOPLE = [
   'Liam Williamson',
   'Mark Thomas',
@@ -38,24 +50,54 @@ const SALESPEOPLE = [
   'Jeremy James'
 ];
 
+const VEHICLE_KEYWORDS = [
+  'Carnival',
+  'Sorento',
+  'Sportage',
+  'Cerato',
+  'Stonic',
+  'Picanto',
+  'Seltos',
+  'EV3',
+  'EV5',
+  'EV6',
+  'EV9',
+  'K4',
+  'Tasman',
+  'Tank',
+  'Haval',
+  'Cannon',
+  'Jolion',
+  'Patrol',
+  'QASHQAI',
+  'Qashqai',
+  'X-TRAIL',
+  'X-Trail',
+  'Navara',
+  'RWD',
+  'AWD',
+  'PV5',
+  'NIRO'
+];
+
 export function parseRowsIntoDeals(rows) {
-
   const groupedDeals = [];
-
   let currentDeal = [];
 
-  for (const row of rows) {
+  for (const rawRow of rows || []) {
+    const row = cleanLine(rawRow);
+
+    if (!row || isHeaderLine(row)) {
+      continue;
+    }
 
     if (isDealStart(row)) {
-
       if (currentDeal.length) {
         groupedDeals.push(currentDeal);
       }
 
       currentDeal = [row];
-
     } else if (currentDeal.length) {
-
       currentDeal.push(row);
     }
   }
@@ -66,213 +108,202 @@ export function parseRowsIntoDeals(rows) {
 
   console.log('GROUPED DEALS:', groupedDeals);
 
-  return groupedDeals
+  const parsed = groupedDeals
     .map(parseDealBlock)
     .filter(Boolean);
+
+  const deduped = new Map();
+
+  parsed.forEach(deal => {
+    if (deal.deal_no) {
+      deduped.set(deal.deal_no, deal);
+    }
+  });
+
+  return Array.from(deduped.values());
+}
+
+function isHeaderLine(row) {
+  return row.includes('AG-DAILY-LOG') ||
+    row.includes('Deal Dat') ||
+    row.includes('--------') ||
+    row.includes('Page #') ||
+    row.includes('records listed') ||
+    row.startsWith('[(') ||
+    row.startsWith('For:') ||
+    row.startsWith('Port:');
 }
 
 function isDealStart(row) {
-
-  return (
-    /\\d{2}\\/\\d{2}\\/\\d{2}/.test(row) &&
-    /[A-Z]{1,4}\\d{3,6}/.test(row) &&
-    DEPT_CODES.some(code => row.includes(code))
-  );
+  return /^\d{2}\/\d{2}\/\d{2}\s+[A-Z]{1,4}\d{3,6}\s+[A-Z]\s+(BLK|BKF|BLG|BLN|BLU|BWH|BWN|BWU|BX)\b/.test(row);
 }
 
 function parseDealBlock(lines) {
-
   try {
+    const combined = cleanLine(lines.join(' '));
 
-    const combined =
-      lines.join(' ')
-        .replace(/\\s+/g, ' ')
-        .trim();
+    const header = combined.match(/^(\d{2}\/\d{2}\/\d{2})\s+([A-Z]{1,4}\d{3,6})\s+([A-Z])\s+(BLK|BKF|BLG|BLN|BLU|BWH|BWN|BWU|BX)\s+(.+)$/);
 
-    const dateMatch =
-      combined.match(/\\d{2}\\/\\d{2}\\/\\d{2}/);
-
-    const dealNoMatch =
-      combined.match(/[A-Z]{1,4}\\d{3,6}/);
-
-    const deptMatch =
-      combined.match(/\\b(BLK|BKF|BLG|BLN|BLU|BWH|BWN|BWU|BX)\\b/);
-
-    if (
-      !dateMatch ||
-      !dealNoMatch ||
-      !deptMatch
-    ) {
+    if (!header) {
       return null;
     }
 
-    const etaMatch =
-      findLastDate(combined);
+    const dealDate = toISODate(header[1]);
+    const dealNo = header[2];
+    const dmsStatus = header[3];
+    const deptCode = header[4];
+    const deptInfo = DEPT_INFO[deptCode] || {};
+    let body = cleanLine(header[5]);
 
-    let etaDate = null;
-
-    if (etaMatch) {
-
-      const [d, m, y] =
-        etaMatch.split('/');
-
-      etaDate =
-        `20${y}-${m}-${d}`;
+    if (deptInfo.name && body.startsWith(deptInfo.name)) {
+      body = cleanLine(body.slice(deptInfo.name.length));
     }
 
-    const salesperson =
-      detectSalesperson(combined);
+    const etaDateRaw = findEtaDate(body);
+    const etaDate = etaDateRaw ? toISODate(etaDateRaw) : null;
 
-    const customerName =
-      extractCustomerName(
-        combined,
-        salesperson,
-        dealNoMatch[0],
-        deptMatch[0]
-      );
+    const saleTypeMatch = body.match(/\b([RFGS])\s+(\d{2}\/\d{2}\/\d{2})\s*$/);
+    const saleType = saleTypeMatch ? saleTypeMatch[1] : '';
 
-    const vehicleDescription =
-      extractVehicle(combined);
+    if (saleTypeMatch) {
+      body = cleanLine(body.slice(0, saleTypeMatch.index));
+    }
 
-    const gross =
-      extractGross(combined);
+    const moneyMatches = [...body.matchAll(/-?\d{1,8}\.\d{2}/g)];
+    const gross = moneyMatches[0] ? Number(moneyMatches[0][0]) : 0;
+    const deposit = moneyMatches[1] ? Number(moneyMatches[1][0]) : 0;
+
+    const beforeMoney = moneyMatches[0]
+      ? cleanLine(body.slice(0, moneyMatches[0].index))
+      : body;
+
+    const customerNoMatch = body.match(/\b\d{5,8}\b/);
+    const customerNo = customerNoMatch ? customerNoMatch[0] : '';
+
+    const front = parseFrontSection(beforeMoney);
 
     return {
-
-      deal_no: dealNoMatch[0],
-
-      dept_code: deptMatch[0],
-
-      customer_name: customerName,
-
-      salesperson,
-
-      vehicle_description: vehicleDescription,
-
+      deal_no: dealNo,
+      deal_date: dealDate,
+      dms_status: dmsStatus,
+      dept_code: deptCode,
+      dept_name: deptInfo.name || '',
+      dealership: deptInfo.site || '',
+      department: deptInfo.name || '',
+      brand: deptInfo.brand || '',
+      customer_name: front.customerName || '',
+      salesperson: front.salesperson || '',
+      stock_no: front.stockNo || '',
+      vehicle_description: front.vehicleDescription || '',
       eta_date: etaDate,
-
       gross,
-
-      last_imported_at:
-        new Date().toISOString()
+      deposit,
+      sale_type: saleType,
+      customer_no: customerNo,
+      last_imported_at: new Date().toISOString()
     };
-
   } catch (err) {
-
-    console.error(
-      'PARSE DEAL FAILED:',
-      err
-    );
-
+    console.error('PARSE DEAL FAILED:', err, lines);
     return null;
   }
 }
 
-function detectSalesperson(text) {
+function parseFrontSection(text) {
+  let working = cleanLine(text);
+  let salesperson = '';
+  let salespersonIndex = -1;
 
   for (const person of SALESPEOPLE) {
+    const match = findLoosePersonMatch(working, person);
 
-    if (
-      text.toLowerCase()
-        .includes(person.toLowerCase())
-    ) {
-      return person;
+    if (match && (salespersonIndex === -1 || match.index < salespersonIndex)) {
+      salesperson = person;
+      salespersonIndex = match.index;
+    }
+  }
+
+  let customerName = working;
+  let afterSalesperson = '';
+
+  if (salespersonIndex >= 0) {
+    customerName = cleanLine(working.slice(0, salespersonIndex));
+    afterSalesperson = cleanLine(working.slice(salespersonIndex));
+
+    const firstName = salesperson.split(' ')[0];
+    afterSalesperson = cleanLine(afterSalesperson.replace(new RegExp('^' + escapeRegExp(firstName) + '\\s+\\S+', 'i'), ''));
+  }
+
+  const stockMatch = afterSalesperson.match(/\b([A-Z]{0,3}\d{3,7}|UC\d{4,7}|NI\d{4,7}|G\d{3,7}|K\d{3,7}|N\d{3,7}|XP\d{3,7}|[A-Z0-9]{1,8}\*O)\b/);
+  let stockNo = '';
+
+  if (stockMatch) {
+    stockNo = stockMatch[1];
+    afterSalesperson = cleanLine(afterSalesperson.replace(stockMatch[0], ''));
+  }
+
+  let vehicleDescription = afterSalesperson;
+
+  if (!vehicleDescription) {
+    vehicleDescription = extractVehicleFromText(working);
+  }
+
+  return {
+    customerName,
+    salesperson,
+    stockNo,
+    vehicleDescription
+  };
+}
+
+function findLoosePersonMatch(text, person) {
+  const [first, last = ''] = person.split(' ');
+  const lastStem = last.slice(0, Math.min(5, last.length));
+  const regex = new RegExp('\\b' + escapeRegExp(first) + '\\s+' + escapeRegExp(lastStem), 'i');
+  return text.match(regex);
+}
+
+function extractVehicleFromText(text) {
+  for (const keyword of VEHICLE_KEYWORDS) {
+    const idx = text.indexOf(keyword);
+
+    if (idx >= 0) {
+      return cleanLine(text.slice(idx, idx + 130));
     }
   }
 
   return '';
 }
 
-function extractCustomerName(
-  text,
-  salesperson,
-  dealNo,
-  deptCode
-) {
+function findEtaDate(text) {
+  const saleTypeEta = text.match(/\b[RFGS]\s+(\d{2}\/\d{2}\/\d{2})\s*$/);
 
-  let working = text;
-
-  working =
-    working.replace(dealNo, '');
-
-  working =
-    working.replace(deptCode, '');
-
-  if (salesperson) {
-
-    const split =
-      working.split(salesperson);
-
-    working = split[0];
+  if (saleTypeEta) {
+    return saleTypeEta[1];
   }
 
-  working =
-    working.replace(/\\d{2}\\/\\d{2}\\/\\d{2}/, '');
+  const dates = [...text.matchAll(/\d{2}\/\d{2}\/\d{2}/g)];
 
-  return working
-    .replace(/\\s+/g, ' ')
+  if (dates.length < 2) {
+    return null;
+  }
+
+  return dates[dates.length - 1][0];
+}
+
+function toISODate(value) {
+  const [day, month, year] = value.split('/');
+  const fullYear = Number(year) >= 70 ? `19${year}` : `20${year}`;
+  return `${fullYear}-${month}-${day}`;
+}
+
+function cleanLine(value) {
+  return String(value || '')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/\s+/g, ' ')
     .trim();
 }
 
-function extractVehicle(text) {
-
-  const vehicleKeywords = [
-    'Carnival',
-    'Sorento',
-    'Sportage',
-    'Cerato',
-    'Stonic',
-    'Picanto',
-    'Seltos',
-    'EV5',
-    'EV6',
-    'Xpeng',
-    'G6',
-    'GWM',
-    'Haval',
-    'Cannon',
-    'X-Trail',
-    'Qashqai',
-    'Patrol',
-    'Navara'
-  ];
-
-  for (const keyword of vehicleKeywords) {
-
-    const idx =
-      text.indexOf(keyword);
-
-    if (idx > -1) {
-
-      return text
-        .slice(idx, idx + 120)
-        .trim();
-    }
-  }
-
-  return '';
-}
-
-function extractGross(text) {
-
-  const matches =
-    [...text.matchAll(/-?\\d+\\.\\d{2}/g)];
-
-  if (!matches.length) {
-    return 0;
-  }
-
-  return Number(matches[0][0]);
-}
-
-function findLastDate(text) {
-
-  const matches =
-    [...text.matchAll(/\\d{2}\\/\\d{2}\\/\\d{2}/g)];
-
-  if (!matches.length) {
-    return null;
-  }
-
-  return matches[matches.length - 1][0];
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

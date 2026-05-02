@@ -40,18 +40,26 @@ export async function upsertDeals(deals) {
     return;
   }
 
-  const safeRows = deals.map(deal => {
-    return {
-      deal_no: deal.deal_no,
-      dept_code: deal.dept_code || null,
-      customer_name: deal.customer_name || null,
-      salesperson: deal.salesperson || null,
-      vehicle_description: deal.vehicle_description || null,
-      eta_date: deal.eta_date || null,
-      gross: deal.gross ?? null,
-      last_imported_at: new Date().toISOString()
-    };
-  });
+  const safeRows = deals.map(deal => ({
+    deal_no: deal.deal_no,
+    deal_date: deal.deal_date || null,
+    dms_status: deal.dms_status || null,
+    dept_code: deal.dept_code || null,
+    dept_name: deal.dept_name || null,
+    dealership: deal.dealership || null,
+    department: deal.department || null,
+    brand: deal.brand || null,
+    customer_name: deal.customer_name || null,
+    salesperson: deal.salesperson || null,
+    stock_no: deal.stock_no || null,
+    vehicle_description: deal.vehicle_description || null,
+    eta_date: deal.eta_date || null,
+    gross: deal.gross ?? null,
+    deposit: deal.deposit ?? null,
+    sale_type: deal.sale_type || null,
+    customer_no: deal.customer_no || null,
+    last_imported_at: new Date().toISOString()
+  }));
 
   const chunkSize = 100;
 
