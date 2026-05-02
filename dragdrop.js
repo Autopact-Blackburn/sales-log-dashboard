@@ -1,115 +1,218 @@
 import { extractRowsFromPDF } from './pdf-extractor.js';
-import { parseRowsIntoDeals } from './parser.js';
+import { parseDeals } from './parser.js';
 import { upsertDeals } from './datastore.js';
 
 export function setupDragAndDrop(onComplete) {
-  const uploadZone = document.getElementById('uploadZone');
-  const pdfInput = document.getElementById('pdfInput');
-  const uploadStatus = document.getElementById('uploadStatus');
 
-  if (!uploadZone || !pdfInput || !uploadStatus) {
-    console.error('Upload elements missing');
+  const uploadZone =
+    document.getElementById('uploadZone');
+
+  const pdfInput =
+    document.getElementById('pdfInput');
+
+  const uploadStatus =
+    document.getElementById('uploadStatus');
+
+  if (
+    !uploadZone ||
+    !pdfInput ||
+    !uploadStatus
+  ) {
+    console.error(
+      'Upload elements missing'
+    );
+
     return;
   }
 
   setupGlobalDropProtection(uploadZone);
 
-  ['dragenter', 'dragover'].forEach(eventName => {
-    uploadZone.addEventListener(eventName, e => {
+  ['dragenter', 'dragover']
+    .forEach(eventName => {
+
+      uploadZone.addEventListener(
+        eventName,
+        e => {
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (e.dataTransfer) {
+            e.dataTransfer.dropEffect =
+              'copy';
+          }
+
+          uploadZone.classList.add(
+            'dragover'
+          );
+        }
+      );
+    });
+
+  ['dragleave', 'drop']
+    .forEach(eventName => {
+
+      uploadZone.addEventListener(
+        eventName,
+        e => {
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          uploadZone.classList.remove(
+            'dragover'
+          );
+        }
+      );
+    });
+
+  uploadZone.addEventListener(
+    'drop',
+    async e => {
+
       e.preventDefault();
       e.stopPropagation();
 
-      if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = 'copy';
+      const files =
+        Array.from(
+          e.dataTransfer?.files || []
+        );
+
+      const file =
+        files.find(item =>
+          item.type === 'application/pdf' ||
+          item.name
+            .toLowerCase()
+            .endsWith('.pdf')
+        );
+
+      if (!file) {
+
+        uploadStatus.innerHTML = `
+          <div class="upload-error">
+            No PDF detected in drop.
+          </div>
+        `;
+
+        return;
       }
 
-      uploadZone.classList.add('dragover');
-    });
-  });
+      console.log(
+        'DROP CAPTURED:',
+        file.name
+      );
 
-  ['dragleave', 'drop'].forEach(eventName => {
-    uploadZone.addEventListener(eventName, e => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      uploadZone.classList.remove('dragover');
-    });
-  });
-
-  uploadZone.addEventListener('drop', async e => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const files = Array.from(e.dataTransfer?.files || []);
-    const file = files.find(item => item.type === 'application/pdf' || item.name.toLowerCase().endsWith('.pdf'));
-
-    if (!file) {
-      uploadStatus.innerHTML = '<div class="upload-error">No PDF detected in drop.</div>';
-      return;
-    }
-
-    console.log('DROP CAPTURED:', file.name);
-
-    await processPDF(file);
-  });
-
-  uploadZone.addEventListener('click', () => {
-    pdfInput.click();
-  });
-
-  uploadZone.addEventListener('keydown', e => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      pdfInput.click();
-    }
-  });
-
-  pdfInput.addEventListener('change', async e => {
-    const file = e.target.files?.[0];
-
-    if (file) {
       await processPDF(file);
     }
+  );
 
-    e.target.value = '';
-  });
+  uploadZone.addEventListener(
+    'click',
+    () => pdfInput.click()
+  );
+
+  uploadZone.addEventListener(
+    'keydown',
+    e => {
+
+      if (
+        e.key === 'Enter' ||
+        e.key === ' '
+      ) {
+
+        e.preventDefault();
+
+        pdfInput.click();
+      }
+    }
+  );
+
+  pdfInput.addEventListener(
+    'change',
+    async e => {
+
+      const file =
+        e.target.files?.[0];
+
+      if (file) {
+        await processPDF(file);
+      }
+
+      e.target.value = '';
+    }
+  );
 
   async function processPDF(file) {
+
     try {
-      if (
-        file.type !== 'application/pdf' &&
-        !file.name.toLowerCase().endsWith('.pdf')
-      ) {
-        uploadStatus.innerHTML = '<div class="upload-error">Only PDF files allowed.</div>';
-        return;
-      }
 
-      uploadStatus.innerHTML = '<div class="upload-processing">Reading PDF...</div>';
+      uploadStatus.innerHTML = `
+        <div class="upload-processing">
+          Reading PDF...
+        </div>
+      `;
 
-      const rows = await extractRowsFromPDF(file);
+      const rows =
+        await extractRowsFromPDF(file);
 
-      console.log('EXTRACTED ROWS:', rows);
+      console.log(
+        'EXTRACTED ROWS:',
+        rows
+      );
 
-      uploadStatus.innerHTML = `<div class="upload-processing">Parsing ${rows.length} rows...</div>`;
+      uploadStatus.innerHTML = `
+        <div class="upload-processing">
+          Parsing ${rows.length} rows...
+        </div>
+      `;
 
-      const parsedDeals = parseRowsIntoDeals(rows);
+      const parsedDeals =
+        parseDeals(rows);
 
-      console.log('PARSED DEALS:', parsedDeals);
+      console.log(
+        'PARSED DEALS:',
+        parsedDeals
+      );
 
       if (!parsedDeals.length) {
-        uploadStatus.innerHTML = `<div class="upload-error">No valid deals parsed. Rows read: ${rows.length}</div>`;
+
+        uploadStatus.innerHTML = `
+          <div class="upload-error">
+            No valid deals parsed.
+          </div>
+        `;
+
         return;
       }
 
-      const etaCount = parsedDeals.filter(deal => deal.eta_date).length;
-
-      uploadStatus.innerHTML = `<div class="upload-processing">Uploading ${parsedDeals.length} deals...</div>`;
+      uploadStatus.innerHTML = `
+        <div class="upload-processing">
+          Uploading ${parsedDeals.length} deals...
+        </div>
+      `;
 
       await upsertDeals(parsedDeals);
 
-      document.getElementById('lastImport').textContent = new Date().toLocaleString('en-AU');
-      document.getElementById('newDeals').textContent = parsedDeals.length;
-      document.getElementById('updatedDeals').textContent = '0';
+      document.getElementById(
+        'lastImport'
+      ).textContent =
+        new Date()
+          .toLocaleString('en-AU');
+
+      document.getElementById(
+        'newDeals'
+      ).textContent =
+        parsedDeals.length;
+
+      document.getElementById(
+        'updatedDeals'
+      ).textContent =
+        '0';
+
+      const etaCount =
+        parsedDeals.filter(
+          d => d.eta
+        ).length;
 
       uploadStatus.innerHTML = `
         <div class="upload-success">
@@ -119,11 +222,19 @@ export function setupDragAndDrop(onComplete) {
         </div>
       `;
 
-      if (typeof onComplete === 'function') {
+      if (
+        typeof onComplete === 'function'
+      ) {
+
         await onComplete(parsedDeals);
       }
+
     } catch (err) {
-      console.error('PDF PROCESS FAILED:', err);
+
+      console.error(
+        'PDF PROCESS FAILED:',
+        err
+      );
 
       uploadStatus.innerHTML = `
         <div class="upload-error">
@@ -134,25 +245,43 @@ export function setupDragAndDrop(onComplete) {
   }
 }
 
-function setupGlobalDropProtection(uploadZone) {
-  ['dragenter', 'dragover', 'drop'].forEach(eventName => {
-    window.addEventListener(eventName, e => {
-      e.preventDefault();
+function setupGlobalDropProtection(
+  uploadZone
+) {
 
-      if (e.dataTransfer) {
-        e.dataTransfer.dropEffect = 'copy';
-      }
+  ['dragenter', 'dragover', 'drop']
+    .forEach(eventName => {
+
+      window.addEventListener(
+        eventName,
+        e => {
+
+          e.preventDefault();
+
+          if (e.dataTransfer) {
+
+            e.dataTransfer.dropEffect =
+              'copy';
+          }
+        }
+      );
     });
-  });
 
-  window.addEventListener('dragleave', e => {
-    if (
-      e.clientX <= 0 ||
-      e.clientY <= 0 ||
-      e.clientX >= window.innerWidth ||
-      e.clientY >= window.innerHeight
-    ) {
-      uploadZone.classList.remove('dragover');
+  window.addEventListener(
+    'dragleave',
+    e => {
+
+      if (
+        e.clientX <= 0 ||
+        e.clientY <= 0 ||
+        e.clientX >= window.innerWidth ||
+        e.clientY >= window.innerHeight
+      ) {
+
+        uploadZone.classList.remove(
+          'dragover'
+        );
+      }
     }
-  });
+  );
 }
