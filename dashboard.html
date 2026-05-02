@@ -13,11 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -38,35 +34,17 @@
       z-index: 999;
     }
 
-    .brand {
-      display: flex;
-      flex-direction: column;
-    }
+    .brand h1 { font-size: 24px; font-weight: 800; color: #111827; }
+    .brand span { font-size: 13px; color: #6b7280; margin-top: 2px; display: block; }
 
-    .brand h1 {
-      font-size: 24px;
-      font-weight: 800;
-      color: #111827;
-    }
-
-    .brand span {
-      font-size: 13px;
-      color: #6b7280;
-      margin-top: 2px;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    .topbar-right { display: flex; align-items: center; gap: 16px; }
 
     .search-box {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 12px;
       padding: 10px 14px;
-      width: 260px;
+      width: 300px;
       font-size: 14px;
       outline: none;
     }
@@ -81,13 +59,11 @@
       font-weight: 600;
     }
 
-    .page {
-      padding: 24px;
-    }
+    .page { padding: 24px; }
 
     .hero-grid {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 350px;
       gap: 20px;
       margin-bottom: 24px;
     }
@@ -98,51 +74,27 @@
       gap: 18px;
     }
 
-    .kpi-card {
+    .kpi-card, .upload-panel, .table-wrapper, .mobile-card {
       background: white;
       border-radius: 18px;
-      padding: 20px;
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
       border: 1px solid #edf1f5;
     }
 
-    .kpi-title {
-      font-size: 13px;
-      color: #6b7280;
-      margin-bottom: 12px;
-      font-weight: 600;
-    }
-
-    .kpi-value {
-      font-size: 32px;
-      font-weight: 800;
-      color: #111827;
-      line-height: 1;
-    }
-
-    .kpi-sub {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #6b7280;
-    }
+    .kpi-card { padding: 20px; }
+    .kpi-title { font-size: 13px; color: #6b7280; margin-bottom: 12px; font-weight: 600; }
+    .kpi-value { font-size: 32px; font-weight: 800; color: #111827; line-height: 1; }
+    .kpi-sub { margin-top: 12px; font-size: 13px; color: #6b7280; }
 
     .upload-panel {
-      background: white;
-      border-radius: 18px;
       padding: 20px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-      border: 1px solid #edf1f5;
       display: flex;
       flex-direction: column;
       gap: 16px;
       justify-content: space-between;
     }
 
-    .upload-panel h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: #111827;
-    }
+    .upload-panel h3 { font-size: 18px; font-weight: 700; color: #111827; }
 
     .upload-zone {
       border: 2px dashed #cfd8e3;
@@ -152,64 +104,25 @@
       background: #f9fafb;
       transition: 0.2s ease;
       cursor: pointer;
-      min-height: 220px;
+      min-height: 230px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      flex-direction: column;
+      user-select: none;
     }
 
-    .upload-zone:hover {
-      background: #eef4ff;
-      border-color: #2563eb;
-    }
+    .upload-zone:hover { background: #eef4ff; border-color: #2563eb; }
+    .upload-zone.dragover { background: #dbeafe; border-color: #2563eb; transform: scale(1.01); }
+    .upload-icon { font-size: 42px; margin-bottom: 12px; }
+    .upload-zone p { color: #4b5563; font-size: 14px; margin-top: 8px; }
+    .hidden-input { display: none; }
+    .upload-meta { font-size: 13px; color: #6b7280; line-height: 1.6; }
+    .upload-success { color: #15803d; font-weight: 700; margin-top: 12px; }
+    .upload-error { color: #dc2626; font-weight: 700; margin-top: 12px; }
+    .upload-processing { color: #2563eb; font-weight: 700; margin-top: 12px; }
 
-    .upload-zone.dragover {
-      background: #dbeafe;
-      border-color: #2563eb;
-      transform: scale(1.01);
-    }
-
-    .upload-icon {
-      font-size: 42px;
-      margin-bottom: 12px;
-    }
-
-    .upload-success {
-      color: #15803d;
-      font-weight: 700;
-      margin-top: 12px;
-    }
-
-    .upload-processing {
-      color: #2563eb;
-      font-weight: 700;
-      margin-top: 12px;
-    }
-
-    .upload-zone p {
-      color: #4b5563;
-      font-size: 14px;
-      margin-top: 8px;
-    }
-
-    .hidden-input {
-      display: none;
-    }
-
-    .upload-meta {
-      font-size: 13px;
-      color: #6b7280;
-      line-height: 1.6;
-    }
-
-    .filters-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
+    .filters-bar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
     .filter-btn {
       border: 1px solid #d1d5db;
       background: white;
@@ -220,34 +133,12 @@
       font-weight: 600;
       color: #374151;
     }
+    .filter-btn.active { background: #111827; color: white; border-color: #111827; }
 
-    .filter-btn.active {
-      background: #111827;
-      color: white;
-      border-color: #111827;
-    }
+    .table-wrapper { overflow: auto; }
 
-    .table-wrapper {
-      background: white;
-      border-radius: 20px;
-      overflow: auto;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-      border: 1px solid #edf1f5;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1700px;
-    }
-
-    thead {
-      background: #f9fafb;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
+    table { width: 100%; border-collapse: collapse; min-width: 1700px; }
+    thead { background: #f9fafb; position: sticky; top: 0; z-index: 10; }
     th {
       padding: 16px;
       text-align: left;
@@ -258,7 +149,6 @@
       border-bottom: 1px solid #e5e7eb;
       white-space: nowrap;
     }
-
     td {
       padding: 14px 16px;
       border-bottom: 1px solid #f1f5f9;
@@ -266,24 +156,11 @@
       vertical-align: middle;
       white-space: nowrap;
     }
+    tr:hover { background: #fafcff; }
+    .deal-no { font-weight: 700; color: #111827; }
+    .money { font-weight: 700; color: #047857; }
 
-    tr:hover {
-      background: #fafcff;
-    }
-
-    .deal-no {
-      font-weight: 700;
-      color: #111827;
-    }
-
-    .money {
-      font-weight: 700;
-      color: #047857;
-    }
-
-    .status-select,
-    .payment-select,
-    .priority-select {
+    .status-select, .payment-select, .priority-select {
       border: 1px solid #d1d5db;
       border-radius: 10px;
       padding: 8px 10px;
@@ -302,20 +179,9 @@
       background: #fff;
     }
 
-    .eta-good {
-      color: #047857;
-      font-weight: 700;
-    }
-
-    .eta-warning {
-      color: #b45309;
-      font-weight: 700;
-    }
-
-    .eta-overdue {
-      color: #dc2626;
-      font-weight: 700;
-    }
+    .eta-good { color: #047857; font-weight: 700; }
+    .eta-warning { color: #b45309; font-weight: 700; }
+    .eta-overdue { color: #dc2626; font-weight: 700; }
 
     .badge {
       padding: 8px 12px;
@@ -327,123 +193,33 @@
       justify-content: center;
     }
 
-    .status-new {
-      background: #dbeafe;
-      color: #1d4ed8;
-    }
+    .status-new { background: #dbeafe; color: #1d4ed8; }
+    .status-pending-finance { background: #fef3c7; color: #b45309; }
+    .status-being-worked-on { background: #cffafe; color: #0f766e; }
+    .status-at-sublet { background: #ede9fe; color: #6d28d9; }
+    .status-delivered { background: #dcfce7; color: #15803d; }
+    .status-pending { background: #e5e7eb; color: #374151; }
+    .status-cancelled { background: #fee2e2; color: #dc2626; }
 
-    .status-pending-finance {
-      background: #fef3c7;
-      color: #b45309;
-    }
+    .mobile-cards { display: none; }
+    .mobile-card { padding: 18px; margin-bottom: 16px; }
+    .mobile-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; }
+    .mobile-card h4 { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+    .mobile-row { margin-bottom: 12px; }
+    .mobile-label { font-size: 11px; text-transform: uppercase; color: #6b7280; margin-bottom: 5px; font-weight: 700; }
 
-    .status-being-worked-on {
-      background: #cffafe;
-      color: #0f766e;
-    }
-
-    .status-at-sublet {
-      background: #ede9fe;
-      color: #6d28d9;
-    }
-
-    .status-delivered {
-      background: #dcfce7;
-      color: #15803d;
-    }
-
-    .status-pending {
-      background: #e5e7eb;
-      color: #374151;
-    }
-
-    .status-cancelled {
-      background: #fee2e2;
-      color: #dc2626;
-    }
-
-    .mobile-cards {
-      display: none;
-    }
-
-    .mobile-card {
-      background: white;
-      border-radius: 18px;
-      padding: 18px;
-      margin-bottom: 16px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-      border: 1px solid #edf1f5;
-    }
-
-    .mobile-card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .mobile-card h4 {
-      font-size: 17px;
-      font-weight: 800;
-      margin-bottom: 6px;
-    }
-
-    .mobile-row {
-      margin-bottom: 12px;
-    }
-
-    .mobile-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      color: #6b7280;
-      margin-bottom: 5px;
-      font-weight: 700;
-    }
-
-    @media(max-width: 1200px) {
-      .hero-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
+    @media(max-width: 1200px) { .hero-grid { grid-template-columns: 1fr; } }
     @media(max-width: 900px) {
-      .topbar {
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-      }
-
-      .topbar-right {
-        width: 100%;
-        flex-wrap: wrap;
-      }
-
-      .search-box {
-        width: 100%;
-      }
-
-      .table-wrapper {
-        display: none;
-      }
-
-      .mobile-cards {
-        display: block;
-      }
-
-      .page {
-        padding: 16px;
-      }
-
-      .kpi-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+      .topbar { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .topbar-right { width: 100%; flex-wrap: wrap; }
+      .search-box { width: 100%; }
+      .table-wrapper { display: none; }
+      .mobile-cards { display: block; }
+      .page { padding: 16px; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .upload-zone { min-height: 180px; }
     }
-
-    @media(max-width: 520px) {
-      .kpi-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    @media(max-width: 520px) { .kpi-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -461,58 +237,23 @@
   </div>
 
   <div class="page">
-
     <div class="hero-grid">
-
       <div class="kpi-grid">
-
-        <div class="kpi-card">
-          <div class="kpi-title">Current Month Deliveries</div>
-          <div class="kpi-value" id="kpiDeliveries">0</div>
-          <div class="kpi-sub">ETA this month</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-title">Total Gross</div>
-          <div class="kpi-value" id="kpiGross">$0</div>
-          <div class="kpi-sub">Current visible deals</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-title">Finance Penetration</div>
-          <div class="kpi-value" id="kpiFinance">0%</div>
-          <div class="kpi-sub">Dealer finance mix</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-title">Pending Finance</div>
-          <div class="kpi-value" id="kpiPendingFinance">0</div>
-          <div class="kpi-sub">Operational risk</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-title">Overdue ETAs</div>
-          <div class="kpi-value" id="kpiOverdue">0</div>
-          <div class="kpi-sub">ETA before today</div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-title">Top Brand</div>
-          <div class="kpi-value" id="kpiTopBrand">-</div>
-          <div class="kpi-sub">Most active pipeline</div>
-        </div>
-
+        <div class="kpi-card"><div class="kpi-title">Current View Deals</div><div class="kpi-value" id="kpiDeliveries">0</div><div class="kpi-sub">Based on selected filter</div></div>
+        <div class="kpi-card"><div class="kpi-title">Total Gross</div><div class="kpi-value" id="kpiGross">$0</div><div class="kpi-sub">Visible deals</div></div>
+        <div class="kpi-card"><div class="kpi-title">Finance Penetration</div><div class="kpi-value" id="kpiFinance">0%</div><div class="kpi-sub">Dealer finance mix</div></div>
+        <div class="kpi-card"><div class="kpi-title">Pending Finance</div><div class="kpi-value" id="kpiPendingFinance">0</div><div class="kpi-sub">Operational risk</div></div>
+        <div class="kpi-card"><div class="kpi-title">Overdue ETAs</div><div class="kpi-value" id="kpiOverdue">0</div><div class="kpi-sub">ETA before today</div></div>
+        <div class="kpi-card"><div class="kpi-title">Top Brand</div><div class="kpi-value" id="kpiTopBrand">-</div><div class="kpi-sub">Most active pipeline</div></div>
       </div>
 
       <div class="upload-panel">
-        <div>
-          <h3>Import Latest PDF</h3>
-        </div>
+        <div><h3>Import Latest PDF</h3></div>
 
         <div class="upload-zone" id="uploadZone">
           <div class="upload-icon">📄</div>
           <strong>Drag & Drop Latest PDF</strong>
-          <p>Drop your dealership deal log here</p>
+          <p>Drop the full dealership deal log here</p>
           <div id="uploadStatus"></div>
         </div>
 
@@ -524,619 +265,422 @@
           <div><strong>Updated Deals:</strong> <span id="updatedDeals">0</span></div>
         </div>
       </div>
-
     </div>
 
     <div class="filters-bar">
-      <button class="filter-btn active">Current Month</button>
-      <button class="filter-btn">Future Pipeline</button>
-      <button class="filter-btn">Pending Finance</button>
-      <button class="filter-btn">Delivered</button>
-      <button class="filter-btn">Cancelled</button>
-      <button class="filter-btn">All Deals</button>
+      <button class="filter-btn active" data-view="current">Current Month</button>
+      <button class="filter-btn" data-view="future">Future Pipeline</button>
+      <button class="filter-btn" data-view="pendingFinance">Pending Finance</button>
+      <button class="filter-btn" data-view="delivered">Delivered</button>
+      <button class="filter-btn" data-view="cancelled">Cancelled</button>
+      <button class="filter-btn" data-view="all">All Deals</button>
     </div>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>Deal No</th>
-            <th>Dept</th>
-            <th>Customer</th>
-            <th>Salesperson</th>
-            <th>Vehicle</th>
-            <th>ETA</th>
-            <th>Gross</th>
-            <th>Deposit</th>
-            <th>Status</th>
-            <th>Payment Method</th>
-            <th>Priority</th>
-            <th>Notes</th>
-            <th>Updated</th>
+            <th>Deal No</th><th>Dept</th><th>Customer</th><th>Salesperson</th><th>Vehicle</th><th>ETA</th><th>Gross</th><th>Deposit</th><th>Status</th><th>Payment Method</th><th>Priority</th><th>Notes</th><th>Updated</th>
           </tr>
         </thead>
-
         <tbody id="dealsTableBody"></tbody>
       </table>
     </div>
 
     <div class="mobile-cards" id="mobileCards"></div>
-
   </div>
 
   <script>
-
-    // ========================================
-    // CONFIG
-    // ========================================
-
     const SUPABASE_URL = 'https://fpuuzgjxmpglklufuovx.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwdXV6Z2p4bXBnbGtsdWZ1b3Z4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2NTY3NjksImV4cCI6MjA5MzIzMjc2OX0.qLI0QjsJbKuGNTJAv5Pg6xRc9245xrBkawjvbd7RnBw';
-
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ========================================
-    // GLOBALS
-    // ========================================
+    let allDeals = [];
+    let visibleDeals = [];
+    let activeView = 'current';
 
-    let deals = [];
+    const STATUS_OPTIONS = ['New', 'Pending Finance', 'Being Worked On', 'At Sublet', 'Delivered', 'Pending', 'Cancelled'];
+    const PAYMENT_OPTIONS = ['Unknown / Pending', 'Cash', 'EFT', 'Dealer Finance', 'Novated Lease', 'External Finance', 'Fleet / Salary Packaging'];
+    const PRIORITY_OPTIONS = ['Low', 'Normal', 'High'];
 
-    const STATUS_OPTIONS = [
-      'New',
-      'Pending Finance',
-      'Being Worked On',
-      'At Sublet',
-      'Delivered',
-      'Pending',
-      'Cancelled'
-    ];
-
-    const PAYMENT_OPTIONS = [
-      'Unknown / Pending',
-      'Cash',
-      'EFT',
-      'Dealer Finance',
-      'Novated Lease',
-      'External Finance',
-      'Fleet / Salary Packaging'
-    ];
-
-    const PRIORITY_OPTIONS = [
-      'Low',
-      'Normal',
-      'High'
-    ];
-
-    // ========================================
-    // INIT
-    // ========================================
+    const DEPT_MAP = {
+      BLK: { name: 'B/Burn Kia', brand: 'Kia', site: 'Blackburn' },
+      BKF: { name: 'B/Burn Kia Flt', brand: 'Kia Fleet', site: 'Blackburn' },
+      BLG: { name: 'B/Burn GWM/Hava', brand: 'GWM/Haval', site: 'Blackburn' },
+      BLN: { name: 'B/Burn Nissan', brand: 'Nissan', site: 'Blackburn' },
+      BLU: { name: 'B/Burn Used', brand: 'Used', site: 'Blackburn' },
+      BWH: { name: 'Burwood HA/GR', brand: 'GWM/Haval', site: 'Burwood' },
+      BWN: { name: 'Burwood Nissan', brand: 'Nissan', site: 'Burwood' },
+      BWU: { name: 'Burwood Used', brand: 'Used', site: 'Burwood' },
+      BX: { name: 'Burwood Xpeng', brand: 'Xpeng', site: 'Burwood' }
+    };
 
     async function initDashboard() {
       await validateSession();
+      preventBrowserFromOpeningDroppedFiles();
+      setupDragAndDropEngine();
+      setupFilterButtons();
+      setupSearch();
       await loadDeals();
       setupRealtime();
     }
 
-    // ========================================
-    // AUTH CHECK
-    // ========================================
-
     async function validateSession() {
       const { data } = await supabaseClient.auth.getSession();
-
-      if (!data.session) {
-        window.location.href = 'index.html';
-      }
+      if (!data.session) window.location.href = 'index.html';
     }
-
-    // ========================================
-    // LOAD DEALS
-    // ========================================
 
     async function loadDeals() {
-
-      const { data, error } = await supabaseClient
-        .from('deals')
-        .select('*')
-        .order('eta_date', { ascending: true });
-
+      const { data, error } = await supabaseClient.from('deals').select('*').order('eta_date', { ascending: true });
       if (error) {
-        console.error(error);
+        console.error('Load deals failed:', error);
+        alert('Could not load deals. Check Supabase RLS/user permissions.');
         return;
       }
-
-      deals = data || [];
-
-      renderKPIs();
-      renderTable();
-      renderMobileCards();
+      allDeals = data || [];
+      applyCurrentView();
     }
 
-    // ========================================
-    // KPI RENDER
-    // ========================================
+    function setupFilterButtons() {
+      document.querySelectorAll('.filter-btn').forEach(button => {
+        button.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          button.classList.add('active');
+          activeView = button.dataset.view;
+          applyCurrentView();
+        });
+      });
+    }
+
+    function applyCurrentView() {
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+
+      visibleDeals = allDeals.filter(deal => {
+        const eta = deal.eta_date ? new Date(deal.eta_date) : null;
+        if (activeView === 'all') return true;
+        if (activeView === 'delivered') return deal.status === 'Delivered';
+        if (activeView === 'cancelled') return deal.status === 'Cancelled';
+        if (activeView === 'pendingFinance') return deal.status === 'Pending Finance' || deal.payment_method === 'Dealer Finance';
+        if (activeView === 'future') return eta && eta > new Date(currentYear, currentMonth + 1, 0);
+        if (activeView === 'current') return eta && eta.getMonth() === currentMonth && eta.getFullYear() === currentYear && deal.status !== 'Delivered' && deal.status !== 'Cancelled';
+        return true;
+      });
+
+      renderKPIs();
+      renderTable(visibleDeals);
+      renderMobileCards(visibleDeals);
+    }
 
     function renderKPIs() {
-
-      const currentMonth = new Date().getMonth();
-      const currentYear = new Date().getFullYear();
-
-      const currentMonthDeals = deals.filter(d => {
-        if (!d.eta_date) return false;
-
-        const eta = new Date(d.eta_date);
-
-        return (
-          eta.getMonth() === currentMonth &&
-          eta.getFullYear() === currentYear &&
-          d.status !== 'Delivered' &&
-          d.status !== 'Cancelled'
-        );
-      });
-
-      const totalGross = currentMonthDeals.reduce((sum, d) => sum + (Number(d.gross) || 0), 0);
-
-      const financeDeals = currentMonthDeals.filter(d => d.payment_method === 'Dealer Finance').length;
-
-      const financePen = currentMonthDeals.length
-        ? Math.round((financeDeals / currentMonthDeals.length) * 100)
-        : 0;
-
-      const pendingFinance = currentMonthDeals.filter(d => d.status === 'Pending Finance').length;
-
-      const overdue = currentMonthDeals.filter(d => {
-        if (!d.eta_date) return false;
-        return new Date(d.eta_date) < new Date();
-      }).length;
+      const source = visibleDeals;
+      const totalGross = source.reduce((sum, d) => sum + (Number(d.gross) || 0), 0);
+      const financeDeals = source.filter(d => d.payment_method === 'Dealer Finance').length;
+      const financePen = source.length ? Math.round((financeDeals / source.length) * 100) : 0;
+      const pendingFinance = source.filter(d => d.status === 'Pending Finance').length;
+      const overdue = source.filter(d => d.eta_date && startOfDay(new Date(d.eta_date)) < startOfDay(new Date()) && d.status !== 'Delivered' && d.status !== 'Cancelled').length;
 
       const brandMap = {};
+      source.forEach(d => { brandMap[d.brand || 'Unknown'] = (brandMap[d.brand || 'Unknown'] || 0) + 1; });
+      const topBrand = Object.keys(brandMap).sort((a, b) => brandMap[b] - brandMap[a])[0] || '-';
 
-      currentMonthDeals.forEach(d => {
-        const brand = d.brand || 'Unknown';
-        brandMap[brand] = (brandMap[brand] || 0) + 1;
-      });
-
-      let topBrand = '-';
-      let topCount = 0;
-
-      for (const brand in brandMap) {
-        if (brandMap[brand] > topCount) {
-          topBrand = brand;
-          topCount = brandMap[brand];
-        }
-      }
-
-      document.getElementById('kpiDeliveries').textContent = currentMonthDeals.length;
-      document.getElementById('kpiGross').textContent = `$${totalGross.toLocaleString()}`;
+      document.getElementById('kpiDeliveries').textContent = source.length;
+      document.getElementById('kpiGross').textContent = formatMoney(totalGross);
       document.getElementById('kpiFinance').textContent = `${financePen}%`;
       document.getElementById('kpiPendingFinance').textContent = pendingFinance;
       document.getElementById('kpiOverdue').textContent = overdue;
       document.getElementById('kpiTopBrand').textContent = topBrand;
     }
 
-    // ========================================
-    // TABLE RENDER
-    // ========================================
-
-    function renderTable() {
-
+    function renderTable(sourceDeals) {
       const tbody = document.getElementById('dealsTableBody');
       tbody.innerHTML = '';
 
-      deals.forEach(deal => {
-
+      sourceDeals.forEach(deal => {
         const row = document.createElement('tr');
-
-        const etaClass = getEtaClass(deal.eta_date);
-        const badgeClass = getStatusBadgeClass(deal.status);
-
         row.innerHTML = `
-          <td class="deal-no">${deal.deal_no || ''}</td>
-          <td>${deal.dept_code || ''}</td>
-          <td>${deal.customer_name || ''}</td>
-          <td>${deal.salesperson || ''}</td>
-          <td>${deal.vehicle_description || ''}</td>
-          <td class="${etaClass}">${formatDate(deal.eta_date)}</td>
+          <td class="deal-no">${escapeHtml(deal.deal_no || '')}</td>
+          <td>${escapeHtml(deal.dept_code || '')}</td>
+          <td>${escapeHtml(deal.customer_name || '')}</td>
+          <td>${escapeHtml(deal.salesperson || '')}</td>
+          <td title="${escapeHtml(deal.vehicle_description || '')}">${escapeHtml(shorten(deal.vehicle_description || '', 56))}</td>
+          <td class="${getEtaClass(deal.eta_date, deal.status)}">${formatDate(deal.eta_date)}</td>
           <td class="money">${formatMoney(deal.gross)}</td>
           <td>${formatMoney(deal.deposit)}</td>
-
-          <td>
-            <select class="status-select ${badgeClass}" onchange="updateField('${deal.id}', 'status', this.value)">
-              ${STATUS_OPTIONS.map(status => `
-                <option value="${status}" ${deal.status === status ? 'selected' : ''}>${status}</option>
-              `).join('')}
-            </select>
-          </td>
-
-          <td>
-            <select class="payment-select" onchange="updateField('${deal.id}', 'payment_method', this.value)">
-              ${PAYMENT_OPTIONS.map(option => `
-                <option value="${option}" ${deal.payment_method === option ? 'selected' : ''}>${option}</option>
-              `).join('')}
-            </select>
-          </td>
-
-          <td>
-            <select class="priority-select" onchange="updateField('${deal.id}', 'priority', this.value)">
-              ${PRIORITY_OPTIONS.map(option => `
-                <option value="${option}" ${deal.priority === option ? 'selected' : ''}>${option}</option>
-              `).join('')}
-            </select>
-          </td>
-
-          <td>
-            <input
-              class="notes-input"
-              value="${deal.notes || ''}"
-              placeholder="Add operational notes..."
-              onblur="updateField('${deal.id}', 'notes', this.value)"
-            >
-          </td>
-
-          <td>${timeAgo(deal.updated_at)}</td>
-        `;
-
+          <td><select class="status-select ${getStatusBadgeClass(deal.status)}" onchange="updateField('${deal.id}', 'status', this.value)">${STATUS_OPTIONS.map(s => `<option value="${s}" ${deal.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></td>
+          <td><select class="payment-select" onchange="updateField('${deal.id}', 'payment_method', this.value)">${PAYMENT_OPTIONS.map(p => `<option value="${p}" ${deal.payment_method === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+          <td><select class="priority-select" onchange="updateField('${deal.id}', 'priority', this.value)">${PRIORITY_OPTIONS.map(p => `<option value="${p}" ${deal.priority === p ? 'selected' : ''}>${p}</option>`).join('')}</select></td>
+          <td><input class="notes-input" value="${escapeAttr(deal.notes || '')}" placeholder="Add notes..." onblur="updateField('${deal.id}', 'notes', this.value)"></td>
+          <td>${timeAgo(deal.updated_at)}</td>`;
         tbody.appendChild(row);
       });
     }
 
-    // ========================================
-    // MOBILE CARDS
-    // ========================================
-
-    function renderMobileCards() {
-
+    function renderMobileCards(sourceDeals) {
       const container = document.getElementById('mobileCards');
       container.innerHTML = '';
 
-      deals.forEach(deal => {
-
+      sourceDeals.forEach(deal => {
         const card = document.createElement('div');
         card.className = 'mobile-card';
-
         card.innerHTML = `
-
-          <div class="mobile-card-top">
-            <div>
-              <h4>${deal.customer_name || ''}</h4>
-              <div>${deal.deal_no || ''}</div>
-            </div>
-            <div class="badge ${getStatusBadgeClass(deal.status)}">
-              ${deal.status || 'New'}
-            </div>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">Vehicle</div>
-            <div>${deal.vehicle_description || ''}</div>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">Salesperson</div>
-            <div>${deal.salesperson || ''}</div>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">ETA</div>
-            <div class="${getEtaClass(deal.eta_date)}">${formatDate(deal.eta_date)}</div>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">Gross</div>
-            <div class="money">${formatMoney(deal.gross)}</div>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">Status</div>
-            <select class="status-select" onchange="updateField('${deal.id}', 'status', this.value)">
-              ${STATUS_OPTIONS.map(status => `
-                <option value="${status}" ${deal.status === status ? 'selected' : ''}>${status}</option>
-              `).join('')}
-            </select>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">Payment Method</div>
-            <select class="payment-select" onchange="updateField('${deal.id}', 'payment_method', this.value)">
-              ${PAYMENT_OPTIONS.map(option => `
-                <option value="${option}" ${deal.payment_method === option ? 'selected' : ''}>${option}</option>
-              `).join('')}
-            </select>
-          </div>
-
-          <div class="mobile-row">
-            <div class="mobile-label">Notes</div>
-            <input
-              class="notes-input"
-              value="${deal.notes || ''}"
-              placeholder="Add notes..."
-              onblur="updateField('${deal.id}', 'notes', this.value)"
-            >
-          </div>
-        `;
-
+          <div class="mobile-card-top"><div><h4>${escapeHtml(deal.customer_name || '')}</h4><div>${escapeHtml(deal.deal_no || '')} · ${escapeHtml(deal.dept_code || '')}</div></div><div class="badge ${getStatusBadgeClass(deal.status)}">${escapeHtml(deal.status || 'New')}</div></div>
+          <div class="mobile-row"><div class="mobile-label">Vehicle</div><div>${escapeHtml(deal.vehicle_description || '')}</div></div>
+          <div class="mobile-row"><div class="mobile-label">Salesperson</div><div>${escapeHtml(deal.salesperson || '')}</div></div>
+          <div class="mobile-row"><div class="mobile-label">ETA</div><div class="${getEtaClass(deal.eta_date, deal.status)}">${formatDate(deal.eta_date)}</div></div>
+          <div class="mobile-row"><div class="mobile-label">Gross</div><div class="money">${formatMoney(deal.gross)}</div></div>
+          <div class="mobile-row"><div class="mobile-label">Status</div><select class="status-select" onchange="updateField('${deal.id}', 'status', this.value)">${STATUS_OPTIONS.map(s => `<option value="${s}" ${deal.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+          <div class="mobile-row"><div class="mobile-label">Payment</div><select class="payment-select" onchange="updateField('${deal.id}', 'payment_method', this.value)">${PAYMENT_OPTIONS.map(p => `<option value="${p}" ${deal.payment_method === p ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+          <div class="mobile-row"><div class="mobile-label">Notes</div><input class="notes-input" value="${escapeAttr(deal.notes || '')}" placeholder="Add notes..." onblur="updateField('${deal.id}', 'notes', this.value)"></div>`;
         container.appendChild(card);
       });
     }
 
-    // ========================================
-    // UPDATE FIELD
-    // ========================================
-
     async function updateField(id, field, value) {
-
-      const { error } = await supabaseClient
-        .from('deals')
-        .update({ [field]: value })
-        .eq('id', id);
-
+      const { error } = await supabaseClient.from('deals').update({ [field]: value }).eq('id', id);
       if (error) {
-        console.error(error);
+        console.error('Update failed:', error);
+        alert('Update failed. Check permissions.');
       }
     }
 
-    // ========================================
-    // REALTIME
-    // ========================================
-
     function setupRealtime() {
-
-      supabaseClient
-        .channel('deals-realtime')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'deals'
-          },
-          () => {
-            loadDeals();
-          }
-        )
-        .subscribe();
+      supabaseClient.channel('deals-realtime').on('postgres_changes', { event: '*', schema: 'public', table: 'deals' }, () => loadDeals()).subscribe();
     }
 
-    // ========================================
-    // SEARCH
-    // ========================================
-
-    document.getElementById('globalSearch').addEventListener('input', (e) => {
-
-      const term = e.target.value.toLowerCase();
-
-      const filtered = deals.filter(d => {
-
-        return (
+    function setupSearch() {
+      document.getElementById('globalSearch').addEventListener('input', (e) => {
+        const term = e.target.value.toLowerCase().trim();
+        if (!term) { applyCurrentView(); return; }
+        visibleDeals = allDeals.filter(d =>
           (d.customer_name || '').toLowerCase().includes(term) ||
           (d.deal_no || '').toLowerCase().includes(term) ||
           (d.salesperson || '').toLowerCase().includes(term) ||
-          (d.vehicle_description || '').toLowerCase().includes(term)
+          (d.vehicle_description || '').toLowerCase().includes(term) ||
+          (d.dept_code || '').toLowerCase().includes(term) ||
+          (d.dept_name || '').toLowerCase().includes(term)
         );
+        renderKPIs();
+        renderTable(visibleDeals);
+        renderMobileCards(visibleDeals);
       });
-
-      renderFiltered(filtered);
-    });
-
-    function renderFiltered(filteredDeals) {
-      deals = filteredDeals;
-      renderTable();
-      renderMobileCards();
     }
 
-    // ========================================
-    // LOGOUT
-    // ========================================
-
     document.getElementById('logoutBtn').addEventListener('click', async () => {
-
       await supabaseClient.auth.signOut();
       window.location.href = 'index.html';
     });
 
-    // ========================================
-    // DRAG + DROP PDF ENGINE
-    // ========================================
-
-    const uploadZone = document.getElementById('uploadZone');
-    const uploadStatus = document.getElementById('uploadStatus');
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-      uploadZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadZone.classList.add('dragover');
+    function preventBrowserFromOpeningDroppedFiles() {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        window.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
       });
-    });
+    }
 
-    ['dragleave', 'drop'].forEach(eventName => {
-      uploadZone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        uploadZone.classList.remove('dragover');
-      });
-    });
+    function setupDragAndDropEngine() {
+      const uploadZone = document.getElementById('uploadZone');
+      const pdfInput = document.getElementById('pdfInput');
+      uploadZone.addEventListener('click', () => pdfInput.click());
+      ['dragenter', 'dragover'].forEach(eventName => uploadZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); uploadZone.classList.add('dragover'); }));
+      ['dragleave', 'drop'].forEach(eventName => uploadZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); uploadZone.classList.remove('dragover'); }));
+      uploadZone.addEventListener('drop', async e => { const file = e.dataTransfer.files && e.dataTransfer.files[0]; if (file) await handlePDFFile(file); });
+      pdfInput.addEventListener('change', async e => { const file = e.target.files && e.target.files[0]; if (file) await handlePDFFile(file); });
+    }
 
-    uploadZone.addEventListener('drop', async (e) => {
-
-      const file = e.dataTransfer.files[0];
-
-      if (!file) {
-        return;
-      }
-
-      if (file.type !== 'application/pdf') {
-        uploadStatus.innerHTML = '<div class="upload-success" style="color:#dc2626;">Only PDF files supported</div>';
-        return;
-      }
-
-      uploadStatus.innerHTML = '<div class="upload-processing">Processing PDF...</div>';
+    async function handlePDFFile(file) {
+      const uploadStatus = document.getElementById('uploadStatus');
+      if (!file.name.toLowerCase().endsWith('.pdf')) { uploadStatus.innerHTML = '<div class="upload-error">Only PDF files are supported.</div>'; return; }
 
       try {
+        uploadStatus.innerHTML = '<div class="upload-processing">Reading PDF text...</div>';
+        const text = await extractPDFText(file);
+        uploadStatus.innerHTML = '<div class="upload-processing">Mapping deal rows...</div>';
+        const parsedDeals = parseDealLogText(text);
 
-        const extractedText = await extractPDFText(file);
+        if (!parsedDeals.length) {
+          console.log('RAW PDF TEXT:', text);
+          uploadStatus.innerHTML = '<div class="upload-error">No valid deal rows found. Check console for raw PDF text.</div>';
+          return;
+        }
 
-        console.log('PDF TEXT:', extractedText);
+        uploadStatus.innerHTML = `<div class="upload-processing">Upserting ${parsedDeals.length} deals...</div>`;
+        const existingDealNos = new Set(allDeals.map(d => d.deal_no));
+        const newCount = parsedDeals.filter(d => !existingDealNos.has(d.deal_no)).length;
+        const updatedCount = parsedDeals.length - newCount;
 
-        uploadStatus.innerHTML = `
-          <div class="upload-success">
-            PDF Successfully Read<br>
-            Parsing engine connected
-          </div>
-        `;
+        await upsertParsedDeals(parsedDeals);
 
-        // ========================================
-        // NEXT STAGE
-        // ========================================
-        // Here we will:
-        // 1. Parse rows
-        // 2. Match columns
-        // 3. Upsert by deal_no
-        // 4. Preserve notes/status/payment
-        // 5. Refresh dashboard
-        // ========================================
-
-      } catch(error) {
-
-        console.error(error);
-
-        uploadStatus.innerHTML = `
-          <div class="upload-success" style="color:#dc2626;">
-            PDF Processing Failed
-          </div>
-        `;
+        document.getElementById('lastImport').textContent = new Date().toLocaleString('en-AU');
+        document.getElementById('newDeals').textContent = newCount;
+        document.getElementById('updatedDeals').textContent = updatedCount;
+        uploadStatus.innerHTML = `<div class="upload-success">Import complete: ${newCount} new / ${updatedCount} updated</div>`;
+        await loadDeals();
+      } catch (error) {
+        console.error('PDF import failed:', error);
+        uploadStatus.innerHTML = `<div class="upload-error">Import failed: ${escapeHtml(error.message || 'Unknown error')}</div>`;
       }
-    });
-
-    // ========================================
-    // PDF TEXT EXTRACTION
-    // ========================================
+    }
 
     async function extractPDFText(file) {
-
+      if (!window.pdfjsLib) throw new Error('PDF.js did not load.');
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
       const arrayBuffer = await file.arrayBuffer();
-
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
       let fullText = '';
 
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-
-        const page = await pdf.getPage(pageNum);
-
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+        const page = await pdf.getPage(pageNumber);
         const content = await page.getTextContent();
-
-        const strings = content.items.map(item => item.str);
-
-        fullText += strings.join(' ') + '
-';
+        const items = content.items.map(item => ({ str: item.str, x: Math.round(item.transform[4]), y: Math.round(item.transform[5]) }));
+        fullText += groupTextItemsIntoRows(items).join('\n') + '\n';
       }
-
       return fullText;
     }
 
-    // ========================================
+    function groupTextItemsIntoRows(items) {
+      const rowMap = new Map();
+      items.forEach(item => {
+        const yKey = Math.round(item.y / 3) * 3;
+        if (!rowMap.has(yKey)) rowMap.set(yKey, []);
+        rowMap.get(yKey).push(item);
+      });
+      return Array.from(rowMap.entries()).sort((a, b) => b[0] - a[0]).map(([, rowItems]) => rowItems.sort((a, b) => a.x - b.x).map(i => i.str).join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean);
+    }
 
-    document.getElementById('pdfInput').addEventListener('change', async (e) => {
+    function parseDealLogText(text) {
+      const lines = text.split(/\r?\n/).map(line => line.replace(/\s+/g, ' ').trim()).filter(Boolean);
+      const records = [];
+      let current = null;
 
-      const file = e.target.files[0];
+      lines.forEach(line => {
+        if (isHeaderLine(line)) return;
+        if (isDealStartLine(line)) {
+          if (current) records.push(current);
+          current = { mainLine: line, continuationLines: [] };
+        } else if (current) {
+          current.continuationLines.push(line);
+        }
+      });
+      if (current) records.push(current);
+      return records.map(parseDealRecord).filter(Boolean);
+    }
 
-      if (!file) return;
+    function isHeaderLine(line) {
+      return line.includes('AG-DAILY-LOG') || line.includes('Deal Dat') || line.includes('--------') || line.includes('Page #') || line.includes('records listed') || line.startsWith('[(');
+    }
 
-      alert('PDF ingestion engine coming next. Dashboard foundation now complete.');
-    });
+    function isDealStartLine(line) {
+      return /^\d{2}\/\d{2}\/\d{2}\s+[A-Z]{1,4}\d{3,6}\s+/.test(line);
+    }
 
-    // ========================================
-    // HELPERS
-    // ========================================
+    function parseDealRecord(record) {
+      const startMatch = record.mainLine.match(/^(\d{2}\/\d{2}\/\d{2})\s+([A-Z]{1,4}\d{3,6})\s+([A-Z])\s+([A-Z]{2,4})\s+(.+)$/);
+      if (!startMatch) return null;
+
+      const dealNo = startMatch[2];
+      const deptCode = startMatch[4];
+      const deptInfo = DEPT_MAP[deptCode] || { name: '', brand: 'Unknown', site: '' };
+      let working = startMatch[5].trim();
+
+      if (deptInfo.name && working.startsWith(deptInfo.name)) working = working.slice(deptInfo.name.length).trim();
+
+      const etaMatch = working.match(/(\d{2}\/\d{2}\/\d{2})\s*$/);
+      const etaDate = etaMatch ? toISODate(etaMatch[1]) : null;
+      if (etaMatch) working = working.slice(0, etaMatch.index).trim();
+
+      const saleTypeMatch = working.match(/\s([RFGS])\s*$/);
+      if (saleTypeMatch) working = working.slice(0, saleTypeMatch.index).trim();
+
+      const numericTokens = working.match(/-?\d+\.\d{2}|\b\d{5,8}\b|\b\d+\.00\b/g) || [];
+      const moneyTokens = numericTokens.filter(token => token.includes('.')).map(Number);
+      const gross = moneyTokens.length ? moneyTokens[0] : null;
+      const deposit = moneyTokens.length > 1 ? moneyTokens[1] : null;
+      const beforeNumbers = numericTokens.length ? working.slice(0, working.indexOf(numericTokens[0])).trim() : working;
+      const parsedFront = parseCustomerSalespersonVehicle(beforeNumbers);
+      const continuationText = record.continuationLines.filter(line => !isDealStartLine(line) && !isHeaderLine(line)).slice(0, 2).join(' ').trim();
+      const vehicleDescription = [parsedFront.vehicleDescription, continuationText].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+
+      return {
+        deal_no: dealNo,
+        customer_name: parsedFront.customerName || 'Unknown Customer',
+        salesperson: parsedFront.salesperson || '',
+        dept_code: deptCode,
+        dept_name: deptInfo.name || '',
+        dealership: deptInfo.site || '',
+        department: deptInfo.name || '',
+        brand: deptInfo.brand || 'Unknown',
+        vehicle_description: vehicleDescription,
+        eta_date: etaDate,
+        gross,
+        deposit,
+        last_imported_at: new Date().toISOString()
+      };
+    }
+
+    function parseCustomerSalespersonVehicle(text) {
+      const stockRegex = /\b([A-Z]{0,3}\d{3,6}|[A-Z0-9]{3,}\*O|UC\d{4,6}|NI\d{4,6}|VW\d{4,6}|XP\d{4,6})\b/;
+      const stockMatch = text.match(stockRegex);
+      let left = text;
+      let vehicle = '';
+      if (stockMatch) {
+        left = text.slice(0, stockMatch.index).trim();
+        vehicle = text.slice(stockMatch.index + stockMatch[0].length).trim();
+      }
+      const words = left.split(' ').filter(Boolean);
+      if (words.length >= 3) return { customerName: words.slice(0, -2).join(' '), salesperson: words.slice(-2).join(' '), vehicleDescription: vehicle };
+      return { customerName: left, salesperson: '', vehicleDescription: vehicle || text };
+    }
+
+    async function upsertParsedDeals(parsedDeals) {
+      const chunkSize = 100;
+      for (let i = 0; i < parsedDeals.length; i += chunkSize) {
+        const chunk = parsedDeals.slice(i, i + chunkSize);
+        const { error } = await supabaseClient.from('deals').upsert(chunk, { onConflict: 'deal_no' });
+        if (error) throw new Error(error.message);
+      }
+    }
 
     function formatMoney(value) {
-      return `$${Number(value || 0).toLocaleString()}`;
+      return Number(value || 0).toLocaleString('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
     }
-
-    function formatDate(date) {
-      if (!date) return '-';
-
-      return new Date(date).toLocaleDateString('en-AU');
-    }
-
+    function formatDate(date) { return date ? new Date(date).toLocaleDateString('en-AU') : '-'; }
+    function toISODate(dateString) { const [day, month, year] = dateString.split('/'); const fullYear = Number(year) >= 70 ? `19${year}` : `20${year}`; return `${fullYear}-${month}-${day}`; }
     function timeAgo(date) {
       if (!date) return '-';
-
       const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-
-      const intervals = {
-        year: 31536000,
-        month: 2592000,
-        day: 86400,
-        hour: 3600,
-        minute: 60
-      };
-
-      for (let key in intervals) {
-        const interval = Math.floor(seconds / intervals[key]);
-
-        if (interval >= 1) {
-          return `${interval} ${key}${interval > 1 ? 's' : ''} ago`;
-        }
-      }
-
+      const intervals = { year: 31536000, month: 2592000, day: 86400, hour: 3600, minute: 60 };
+      for (let key in intervals) { const interval = Math.floor(seconds / intervals[key]); if (interval >= 1) return `${interval} ${key}${interval > 1 ? 's' : ''} ago`; }
       return 'Just now';
     }
-
-    function getEtaClass(date) {
-
-      if (!date) return '';
-
-      const eta = new Date(date);
-      const today = new Date();
-
-      const diff = eta - today;
-
-      const days = diff / (1000 * 60 * 60 * 24);
-
+    function getEtaClass(date, status) {
+      if (!date || status === 'Delivered' || status === 'Cancelled') return '';
+      const eta = startOfDay(new Date(date));
+      const today = startOfDay(new Date());
+      const days = (eta - today) / (1000 * 60 * 60 * 24);
       if (days < 0) return 'eta-overdue';
       if (days < 7) return 'eta-warning';
-
       return 'eta-good';
     }
-
     function getStatusBadgeClass(status) {
-
       switch(status) {
-        case 'New':
-          return 'status-new';
-
-        case 'Pending Finance':
-          return 'status-pending-finance';
-
-        case 'Being Worked On':
-          return 'status-being-worked-on';
-
-        case 'At Sublet':
-          return 'status-at-sublet';
-
-        case 'Delivered':
-          return 'status-delivered';
-
-        case 'Pending':
-          return 'status-pending';
-
-        case 'Cancelled':
-          return 'status-cancelled';
-
-        default:
-          return '';
+        case 'New': return 'status-new';
+        case 'Pending Finance': return 'status-pending-finance';
+        case 'Being Worked On': return 'status-being-worked-on';
+        case 'At Sublet': return 'status-at-sublet';
+        case 'Delivered': return 'status-delivered';
+        case 'Pending': return 'status-pending';
+        case 'Cancelled': return 'status-cancelled';
+        default: return '';
       }
     }
-
-    // ========================================
-    // START
-    // ========================================
+    function startOfDay(date) { return new Date(date.getFullYear(), date.getMonth(), date.getDate()); }
+    function shorten(text, max) { return text && text.length > max ? text.slice(0, max) + '...' : (text || ''); }
+    function escapeHtml(value) { return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;'); }
+    function escapeAttr(value) { return escapeHtml(value).replaceAll('\n', ' '); }
 
     initDashboard();
-
   </script>
-
 </body>
 </html>
