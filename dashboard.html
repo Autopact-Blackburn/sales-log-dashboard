@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
   <style>
     * {
@@ -151,11 +152,39 @@
       background: #f9fafb;
       transition: 0.2s ease;
       cursor: pointer;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
     }
 
     .upload-zone:hover {
       background: #eef4ff;
       border-color: #2563eb;
+    }
+
+    .upload-zone.dragover {
+      background: #dbeafe;
+      border-color: #2563eb;
+      transform: scale(1.01);
+    }
+
+    .upload-icon {
+      font-size: 42px;
+      margin-bottom: 12px;
+    }
+
+    .upload-success {
+      color: #15803d;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
+    .upload-processing {
+      color: #2563eb;
+      font-weight: 700;
+      margin-top: 12px;
     }
 
     .upload-zone p {
@@ -480,10 +509,12 @@
           <h3>Import Latest PDF</h3>
         </div>
 
-        <label class="upload-zone" for="pdfInput">
-          <strong>Drag & Drop PDF</strong>
-          <p>or click to upload latest deal log</p>
-        </label>
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">📄</div>
+          <strong>Drag & Drop Latest PDF</strong>
+          <p>Drop your dealership deal log here</p>
+          <div id="uploadStatus"></div>
+        </div>
 
         <input type="file" id="pdfInput" class="hidden-input" accept="application/pdf">
 
@@ -904,7 +935,106 @@
     });
 
     // ========================================
-    // FILE UPLOAD PLACEHOLDER
+    // DRAG + DROP PDF ENGINE
+    // ========================================
+
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadZone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadZone.classList.remove('dragover');
+      });
+    });
+
+    uploadZone.addEventListener('drop', async (e) => {
+
+      const file = e.dataTransfer.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      if (file.type !== 'application/pdf') {
+        uploadStatus.innerHTML = '<div class="upload-success" style="color:#dc2626;">Only PDF files supported</div>';
+        return;
+      }
+
+      uploadStatus.innerHTML = '<div class="upload-processing">Processing PDF...</div>';
+
+      try {
+
+        const extractedText = await extractPDFText(file);
+
+        console.log('PDF TEXT:', extractedText);
+
+        uploadStatus.innerHTML = `
+          <div class="upload-success">
+            PDF Successfully Read<br>
+            Parsing engine connected
+          </div>
+        `;
+
+        // ========================================
+        // NEXT STAGE
+        // ========================================
+        // Here we will:
+        // 1. Parse rows
+        // 2. Match columns
+        // 3. Upsert by deal_no
+        // 4. Preserve notes/status/payment
+        // 5. Refresh dashboard
+        // ========================================
+
+      } catch(error) {
+
+        console.error(error);
+
+        uploadStatus.innerHTML = `
+          <div class="upload-success" style="color:#dc2626;">
+            PDF Processing Failed
+          </div>
+        `;
+      }
+    });
+
+    // ========================================
+    // PDF TEXT EXTRACTION
+    // ========================================
+
+    async function extractPDFText(file) {
+
+      const arrayBuffer = await file.arrayBuffer();
+
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+      let fullText = '';
+
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+
+        const page = await pdf.getPage(pageNum);
+
+        const content = await page.getTextContent();
+
+        const strings = content.items.map(item => item.str);
+
+        fullText += strings.join(' ') + '
+';
+      }
+
+      return fullText;
+    }
+
     // ========================================
 
     document.getElementById('pdfInput').addEventListener('change', async (e) => {
